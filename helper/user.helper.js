@@ -27,6 +27,9 @@ exports.findUser = function(username, users) {
  * @returns {int} the highest id value
  */
 exports.getHighestId = function (users) {
+
+  if (users.length === 0) return 0;
+
   let ids = [];
   for(let i = 0; i < users.length; i++) {
     ids.push(users[i]._id);
