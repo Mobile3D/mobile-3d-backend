@@ -18,6 +18,8 @@
     "express-rate-limit": "^5.0.0",
     "helmet": "^3.18.0",
     "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.1",
+    "serialport": "^7.1.5",
     "socket.io": "^2.2.0",
     "uuid": "^3.3.2"
   }
