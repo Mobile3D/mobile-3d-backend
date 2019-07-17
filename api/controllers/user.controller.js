@@ -3,6 +3,7 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 const userHelper = require('../../helper/user.helper');
+const arrayHelper = require('../../helper/array.helper');
 
 /**
  * Function for registering a new user to the application
@@ -68,7 +69,7 @@ exports.register = function (req, res) {
     }
 
     // get the highest id in the file and give the new user the highest + 1
-    newUser._id = userHelper.getHighestId(users) + 1;
+    newUser._id = arrayHelper.getHighestId(users) + 1;
     // add the user to the array
     users.push(newUser);  
     // write the file

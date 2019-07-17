@@ -28,7 +28,11 @@ module.exports = function (app) {
   });
 
   app.route('/v1/uploads')
-    .get(user.protected)
+    .get(user.protected, upload.getAll)
     .post(user.protected, mUpload.single('file'), upload.add);
+
+  app.route('/v1/uploads/:upload_id')
+    .get(user.protected, upload.get)
+    .delete(user.protected, upload.delete);
 
 }
