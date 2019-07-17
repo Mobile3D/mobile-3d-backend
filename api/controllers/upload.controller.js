@@ -1,8 +1,18 @@
+// required node packages
 const fs = require('fs');
 const uploadHelper = require('../../helper/upload.helper');
 
+/**
+ * Function for uploading files to the files/ directory
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} error or the successfully uploaded file
+ */
 exports.add = function (req, res) {
   
+  // check if required parameters are given
   if (req.file === undefined) {
     return res.status(400).json({
       error: {
@@ -12,6 +22,7 @@ exports.add = function (req, res) {
     });
   }
 
+  // create a new upload object
   let newUpload = {
     name: req.file.originalname.split('.')[0],
     filename: req.file.filename,
@@ -36,7 +47,9 @@ exports.add = function (req, res) {
     // make js objects out of the json string
     let files = JSON.parse(data);
 
+    // get highest id of the entries in the files.json file
     newUpload._id = uploadHelper.getHighestId(files) + 1;
+    // add the object to the array
     files.push(newUpload);
 
     // write the file

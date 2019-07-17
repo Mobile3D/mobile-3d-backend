@@ -41,7 +41,7 @@ exports.getHighestId = function (users) {
  * Function to check, if the jwt authorization token is valid or expired
  * 
  * @param {object} req the node request parameter
- * @param {object} res the node result parameter
+ * @param {object} res the node response parameter
  * @param {object} next the node next parameter
  */
 exports.checkToken = function (req, res, next) {

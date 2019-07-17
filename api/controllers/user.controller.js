@@ -8,7 +8,7 @@ const userHelper = require('../../helper/user.helper');
  * Function for registering a new user to the application
  * 
  * @param {object} req the node request parameter
- * @param {object} res the node result parameter
+ * @param {object} res the node response parameter
  * 
  * @returns {object} error message or the new user
  */
@@ -99,7 +99,7 @@ exports.register = function (req, res) {
  * and get access to the client application
  * 
  * @param {object} req the node request parameter
- * @param {object} res the node result parameter
+ * @param {object} res the node response parameter
  * 
  * @returns {object} error or a signed jwt
  */
@@ -165,7 +165,7 @@ exports.login = function (req, res) {
  * Function for protecting routes against unauthorized access
  * 
  * @param {object} req the node request parameter
- * @param {object} res the node result parameter
+ * @param {object} res the node response parameter
  */
 exports.protected = function (req, res, next) {
 
@@ -189,7 +189,7 @@ exports.protected = function (req, res, next) {
  * Function to get the current user with its token
  * 
  * @param {object} req the node request parameter
- * @param {object} res the node result parameter
+ * @param {object} res the node response parameter
  * 
  * @returns {object} error or the corresponding user
  */
