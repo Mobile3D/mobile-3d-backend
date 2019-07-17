@@ -10,8 +10,8 @@ const jwt = require('jsonwebtoken');
  * 
  * @returns {object}
  */
-exports.findUser = function(username, users) {
-  for(let i = 0; i < users.length; i++) {
+exports.findUser = function (username, users) {
+  for (let i = 0; i < users.length; i++) {
     if(users[i].username === username) {
       return users[i];
     }
@@ -31,11 +31,19 @@ exports.getHighestId = function (users) {
   if (users.length === 0) return 0;
 
   let ids = [];
-  for(let i = 0; i < users.length; i++) {
+  for (let i = 0; i < users.length; i++) {
     ids.push(users[i]._id);
   }
   return Math.max(...ids);
 } 
+
+exports.removePasswordFields = function (users) {
+
+  for (let i = 0; i < users.length; i++) {
+    users[i].password = undefined;
+  }
+
+}
 
 /**
  * Function to check, if the jwt authorization token is valid or expired

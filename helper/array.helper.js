@@ -10,7 +10,7 @@ exports.getHighestId = function (arr) {
   if (arr.length === 0) return 0;
 
   let ids = [];
-  for(let i = 0; i < arr.length; i++) {
+  for (let i = 0; i < arr.length; i++) {
     ids.push(arr[i]._id);
   }
   return Math.max(...ids);

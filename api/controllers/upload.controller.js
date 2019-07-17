@@ -53,7 +53,7 @@ exports.add = function (req, res) {
     uploads.push(newUpload);
 
     // write the file
-    fs.writeFile(__basedir + '/data/uploads.json', JSON.stringify(uploads), function(err) {
+    fs.writeFile(__basedir + '/data/uploads.json', JSON.stringify(uploads), function (err) {
       
       // writing error
       if (err) {
@@ -75,7 +75,7 @@ exports.add = function (req, res) {
 }
 
 /**
- * Function for getting all objects of the array
+ * Function for getting uploads
  * 
  * @param {object} req the node request parameter
  * @param {object} res the node response parameter
@@ -126,14 +126,16 @@ exports.get = function (req, res) {
       });
     }
 
+    // convert string to object
     let uploads = JSON.parse(data);
     let upload = arrayHelper.findById(parseInt(req.params.upload_id), uploads);
     
+    // if upload has not been found
     if (!upload) {
       return res.status(400).json({
         error: {
-          code: 'ER_FILE_NOT_FOUND',
-          message: 'ER_FILE_NOT_FOUND: There is no upload with this id.'
+          code: 'ER_UPLOAD_NOT_FOUND',
+          message: 'ER_UPLOAD_NOT_FOUND: There is no upload with this id.'
         }
       });
     }
@@ -154,6 +156,7 @@ exports.get = function (req, res) {
  */
 exports.delete = function (req, res) {
 
+  // read uploads file
   fs.readFile(__basedir + '/data/uploads.json', 'utf8', function (err, data) {
     
     // error reading the file
@@ -166,22 +169,25 @@ exports.delete = function (req, res) {
       });
     }
 
+    // convert string to object
     let uploads = JSON.parse(data);
     let upload = arrayHelper.findById(parseInt(req.params.upload_id), uploads);
     
+    // if delete is not successfull
     if (!arrayHelper.delete(parseInt(req.params.upload_id), uploads)) {
       return res.status(400).json({
         error: {
-          code: 'ER_FILE_NOT_FOUND',
-          message: 'ER_FILE_NOT_FOUND: There is no file with this id.'
+          code: 'ER_UPLOAD_NOT_FOUND',
+          message: 'ER_UPLOAD_NOT_FOUND: There is no upload with this id.'
         }
       });
     }
 
+    // delete the file
     fs.unlinkSync(__basedir + '/files/' + upload.filename);
 
     // write the file
-    fs.writeFile(__basedir + '/data/uploads.json', JSON.stringify(uploads), function(err) {
+    fs.writeFile(__basedir + '/data/uploads.json', JSON.stringify(uploads), function (err) {
       
       // writing error
       if (err) {
@@ -193,6 +199,7 @@ exports.delete = function (req, res) {
         });
       }
 
+      // return success message
       return res.json({
         success: {
           code: 'OK_DELETED',

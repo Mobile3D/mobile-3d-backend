@@ -64,6 +64,7 @@ app.use('/uploads', express.static('./uploads'));
 // implement api routes to the main application
 const userRoutes = require('./api/routes/user.routes');
 const uploadRoutes = require('./api/routes/upload.routes');
+
 userRoutes(app);
 uploadRoutes(app);
 

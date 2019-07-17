@@ -1,6 +1,5 @@
 /**
  * All routes of the upload object for the api
- * 
  */
 module.exports = function (app) {
   // required node packages

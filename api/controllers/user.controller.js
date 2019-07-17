@@ -19,12 +19,13 @@ exports.register = function (req, res) {
   if (req.body.username === undefined ||
       req.body.password === undefined ||
       req.body.firstname === undefined ||
-      req.body.lastname === undefined) {
+      req.body.lastname === undefined ||
+      req.body.admin === undefined) {
       
       return res.status(400).json({
         error: {
           code: 'ER_MISSING_PARAMS',
-          message: 'ER_MISSING_PARAMS: Registering failed. Required parameters: username, password, firstname, lastname'
+          message: 'ER_MISSING_PARAMS: Registering failed. Required parameters: username, password, firstname, lastname, admin'
         }
       });
 
@@ -36,7 +37,7 @@ exports.register = function (req, res) {
     password: bcryptjs.hashSync(req.body.password, 10),
     fistname: req.body.firstname,
     lastname: req.body.lastname,
-    admin: true,
+    admin: req.body.admin === 'true' ? true : false,
     disabled: false,
     created_at: Date.now()
   };
@@ -73,7 +74,7 @@ exports.register = function (req, res) {
     // add the user to the array
     users.push(newUser);  
     // write the file
-    fs.writeFile(__basedir + '/data/users.json', JSON.stringify(users), function(err) {
+    fs.writeFile(__basedir + '/data/users.json', JSON.stringify(users), function (err) {
       
       // writing error
       if (err) {
@@ -156,6 +157,149 @@ exports.login = function (req, res) {
         admin: user.admin,
         timestamp: user.timestamp
       }, '965b41674c2940ab946dc0612f4dbc2bf9e2162beefd8037c27c92abf0ad72aa', {expiresIn: 86400})
+    });
+
+  });
+
+}
+
+/**
+ * Function for getting all users
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} error or the uploads array
+ */
+exports.getAll = function (req, res) {
+
+  // read the file
+  fs.readFile(__basedir + '/data/users.json', 'utf8', function (err, data) {
+    
+    // error reading the file
+    if (err) {
+      return res.status(500).json({
+        error: {
+          code: 'ER_INTERNAL',
+          message: err.message
+        }
+      });
+    }
+
+    // convert string to object
+    let users = JSON.parse(data);
+    // remove all password fields
+    userHelper.removePasswordFields(users);
+
+    // return the array
+    return res.json(users);  
+
+  });
+
+}
+
+/** 
+ * Function for getting a specific user by id
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} error or the found user
+ */
+exports.get = function (req, res) {
+
+  // read users file
+  fs.readFile(__basedir + '/data/users.json', 'utf8', function (err, data) {
+    
+    // error reading the file
+    if (err) {
+      return res.status(500).json({
+        error: {
+          code: 'ER_INTERNAL',
+          message: err.message
+        }
+      });
+    }
+
+    // convert string to obecjt
+    let users = JSON.parse(data);
+    // get requested user
+    let user = arrayHelper.findById(parseInt(req.params.user_id), users);
+
+    // if the user was not found
+    if (!user) {
+      return res.status(400).json({
+        error: {
+          code: 'ER_USER_NOT_FOUND',
+          message: 'ER_USER_NOT_FOUND: There is no user with this id.'
+        }
+      });
+    }
+
+    // hide password
+    user.password = undefined;
+
+    return res.json(user);
+
+  });
+}
+
+/**
+ * Function for deleting a specific user by id
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} error or success
+ */
+exports.delete = function (req, res) {
+
+  // read users file
+  fs.readFile(__basedir + '/data/users.json', 'utf8', function (err, data) {
+    
+    // error reading the file
+    if (err) {
+      return res.status(500).json({
+        error: {
+          code: 'ER_INTERNAL',
+          message: err.message
+        }
+      });
+    }
+
+    let users = JSON.parse(data);
+
+    // if user has not been found
+    if (!arrayHelper.delete(parseInt(req.params.user_id), users)) {
+      return res.status(400).json({
+        error: {
+          code: 'ER_USER_NOT_FOUND',
+          message: 'ER_USER_NOT_FOUND: There is no user with this id.'
+        }
+      });
+    }
+
+    // write the file
+    fs.writeFile(__basedir + '/data/users.json', JSON.stringify(users), function (err) {
+      
+      // writing error
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 'ER_INTERNAL',
+            message: err.message
+          }
+        });
+      }
+
+      // return success message
+      return res.json({
+        success: {
+          code: 'OK_DELETED',
+          message: 'OK_DELETED: entry successfully deleted.'
+        }
+      });
+
     });
 
   });
