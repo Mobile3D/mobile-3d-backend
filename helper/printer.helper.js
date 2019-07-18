@@ -3,10 +3,6 @@ const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
 const events = require('events');
 const em = new events.EventEmitter();
-// just for debugging purposes
-const serialLog = require('debug')('marlinjs:serial-rx')
-const log = require('debug')('marlinjs:log');
-const serialWriteLog = require('debug')('marlinjs:serial-tx');
 const lineByLine = require('n-readlines');
 
 /**
@@ -51,7 +47,7 @@ function Printer(port, baudRate) {
   // is triggered after every command sent to the microcontroller
   parser.on('data', function (data) {
     // convert data to string
-    serialLog(data.toString());
+    console.log(data.toString());
     // if there is no current command, go back
     if (!self.current) return; 
     // if there is a current command and data is 'ok'
@@ -65,7 +61,7 @@ function Printer(port, baudRate) {
   // when the microcontroller has successfully opened the port
   this.serial.on('open', () => {
     // log
-    log('Port open.');
+    console.log('Port open');
     setTimeout(() => {
       // get firmware information of marlinFW
       this.send('M115');
@@ -129,7 +125,7 @@ Printer.prototype.processQueue = function () {
   // set next command to current
   this.current = next;
   // log
-  serialWriteLog(next.cmd + (next.cmt ? ` ;${next.cmt}` : ''));
+  console.log(next.cmd + (next.cmt ? ` ;${next.cmt}` : ''));
 
   // send the command to the printer
   this.serial.write(`${next.cmd}\n`);
@@ -149,9 +145,11 @@ Printer.prototype.printFile = function (file) {
 
   // add listener for printing progress
   em.addListener('progress', function () {});
+  em.addListener('status', function () {});
 
   // log
-  log('Printing');
+  console.log('printing');
+  em.emit('status', 'printing');
 
   // get lines of the file
   let lines = new lineByLine(file);
@@ -164,7 +162,7 @@ Printer.prototype.printFile = function (file) {
     lineNumber++;
   }
 
-  lines.reset();
+  lines = new lineByLine(file);
 
   // set a callback function
   this.setProcessQueueCallback(() => {
@@ -173,46 +171,51 @@ Printer.prototype.printFile = function (file) {
     if (this.queue.length < this.queueBufferChunkSize) {
 
       // log
-      log('Reloading the queue...');
+      console.log('Reloading the queue...');
 
       // as long as queue is smaller than the buffer size
       for (let count = 0; this.queue.length < this.queueBufferSize; count++) {
 
-        // get a single line
-        let line = lines.next().toString('ascii');
-        let cmt = null;
-        
-        // if there is no more line
-        if (line === 'false') {
-          // log
-          log('File completed');
-          // set null as callback
-          this.setProcessQueueCallback(null);
-          return;
-        }
+        if (!this.paused) {
 
-        // if line has a semikolon, there is a comment in it
-        if (line.includes(';')) {
-          const parts = line.split(';');
-          line = parts[0];
-          cmt = parts[1];
-        }
+          // get a single line
+          let line = lines.next().toString('ascii');
+          let cmt = null;
+          
+          // if there is no more line
+          if (line === 'false') {
+            // log
+            console.log('File completed');
+            // set null as callback
+            this.setProcessQueueCallback(null);
+            return;
+          }
 
-        // if line is false or if there is only a space in line, go on
-        if (!line || line === 'false' || !line.replace(/\s/g, '').length) {
-          continue;
-        }
+          // if line has a semikolon, there is a comment in it
+          if (line.includes(';')) {
+            const parts = line.split(';');
+            line = parts[0];
+            cmt = parts[1];
+          }
 
-        // if everything is fine, send the line
-        this.send(line, cmt);
-        lineCount++;
+          // if line is false or if there is only a space in line, go on
+          if (!line || line === 'false' || !line.replace(/\s/g, '').length) {
+            continue;
+          }
+
+          lineCount++;
+          em.emit('progress', { sent: lineCount, total: lineNumber });
+          // if everything is fine, send the line
+          this.send(line, cmt);
+
+        } else {
+          em.emit('status', 'paused');
+        }
 
       }
     }
 
   });
-
-  em.emit('progress', lineCount / lineNumber);
   
   // work off the queue
   this.processQueue();

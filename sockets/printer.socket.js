@@ -5,14 +5,18 @@ module.exports = function (io) {
   const socketHelper = require('../helper/socket.helper');
   const arrayHelper = require('../helper/array.helper');
   const printerHelper = require('../helper/printer.helper');
-  const device = new printerHelper('COM5', 9600);
+  const printer = new printerHelper('COM3', 9600);
 
   // listen for socket connections with authentication
-  io.use(socketHelper.checkToken).on('connection', (socket) => {
+  //io.use(socketHelper.checkToken).on('connection', (socket) => {
+  io.on('connection', (socket) => {
     
     // printFile event listener
     socket.on('printFile', (data) => {
-
+      
+      // if required parameters are missing
+      if (data._id === undefined) {
+        // emit an error
         return socket.emit('printError', {
           error: {
             code: 'ER_MISSING_PARAMS',
@@ -49,8 +53,21 @@ module.exports = function (io) {
           });
         }
 
+        // progress event listener
+        printer.emitter.on('progress', (data) => {
+          console.log(data);
+        });
+
+        // status event listener
+        printer.emitter.on('status', (data) => {
+          console.log(data);
+        });
+
+        // print the file
+        printer.printFile(__basedir + '/files/' + upload.filename);
+
         // emit a success event
-        return socket.emit('printSuccess', {
+        socket.emit('printSuccess', {
           success: {
             code: 'OK_PRINTING',
             message: 'OK_PRINTING: The file is going to be printed.',
@@ -60,6 +77,18 @@ module.exports = function (io) {
 
       });
 
+    });
+
+    socket.on('pausePrint', () => {
+      printer.paused = true;
+    });
+
+    socket.on('unpausePrint', () => {
+      printer.paused = false;
+    });
+
+    socket.on('cancelPrint', () => {
+      printer.stopped = true;
     });
 
   });
