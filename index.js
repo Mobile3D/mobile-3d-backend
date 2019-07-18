@@ -68,6 +68,9 @@ const uploadRoutes = require('./api/routes/upload.routes');
 userRoutes(app);
 uploadRoutes(app);
 
+const printerSocket = require('./sockets/printer.socket');
+printerSocket(io);
+
 // start the http server
 http.listen(port);
 console.log('Mobile3D Backend started on ' + __host + ':' + __port);

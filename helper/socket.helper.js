@@ -1,3 +1,6 @@
+// required node packages
+const jwt = require('jsonwebtoken');
+
 /**
  * Function to check, if the jwt authorization token is valid or expired for sockets
  * research: https://stackoverflow.com/questions/36788831/authenticating-socket-io-connections
@@ -16,7 +19,7 @@ exports.checkToken = function (socket, next) {
     });
 
   } else {
-      next(new Error('ER_AUTH_ERROR'));
+      next(new Error('ER_AUTH_FAILED'));
   }   
 
 }

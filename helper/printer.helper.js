@@ -1,11 +1,13 @@
 // required node packages
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
+const events = require('events');
+const em = new events.EventEmitter();
 // just for debugging purposes
 const serialLog = require('debug')('marlinjs:serial-rx')
 const log = require('debug')('marlinjs:log');
 const serialWriteLog = require('debug')('marlinjs:serial-tx');
-const fgets = require('n-readlines');
+const lineByLine = require('n-readlines');
 
 /**
  * Printer Class to symbolize the printer as an object
@@ -17,6 +19,8 @@ const fgets = require('n-readlines');
  * @prop {boolean} ready if the printer is currently printing or ready
  * @prop {array} queue the queue with all commands of a g-code file seperated by '\n'
  * @prop {boolean} busy if the api is currently sending a command to the printer
+ * @prop {boolean} paused if the printer should pause printing
+ * @prop {boolean} stopped if the printer should stop printing
  * @prop {object} current the current command in the queue
  * @prop {object} queueCallback parameter for callback function of setProcessQueueCallback()
  * @prop {int} queueBufferSize the buffer size of the printers microcontroller
@@ -32,11 +36,14 @@ function Printer(port, baudRate) {
   this.ready = false;
   this.queue = [];
   this.busy = false;
+  this.paused = false;
+  this.stopped = false;
   this.current = null;
   this.queueCallback = null;
   this.queueBufferSize = 20;
   this.queueBufferChunkSize = 10;
 
+  let self = this;
   // initialize a parser and pipe it with readline
   const parser = this.serial.pipe(new Readline({ delimiter: '\n' }));
 
@@ -46,12 +53,12 @@ function Printer(port, baudRate) {
     // convert data to string
     serialLog(data.toString());
     // if there is no current command, go back
-    if (!this.current) return; 
+    if (!self.current) return; 
     // if there is a current command and data is 'ok'
     else if (data.toString() === 'ok') {
-      this.current = null;
+      self.current = null;
       // work off the queue
-      this.processQueue();
+      self.processQueue();
     }
   });
 
@@ -140,11 +147,24 @@ Printer.prototype.processQueue = function () {
  */
 Printer.prototype.printFile = function (file) {
 
+  // add listener for printing progress
+  em.addListener('progress', function () {});
+
   // log
   log('Printing');
 
   // get lines of the file
-  let lines = new fgets(file);
+  let lines = new lineByLine(file);
+
+  let line;
+  let lineNumber = 0;
+  let lineCount = 0;
+ 
+  while (line = lines.next()) {
+    lineNumber++;
+  }
+
+  lines.reset();
 
   // set a callback function
   this.setProcessQueueCallback(() => {
@@ -185,15 +205,22 @@ Printer.prototype.printFile = function (file) {
 
         // if everything is fine, send the line
         this.send(line, cmt);
+        lineCount++;
 
       }
     }
 
   });
+
+  em.emit('progress', lineCount / lineNumber);
   
   // work off the queue
   this.processQueue();
 }
 
+// export the event emitter
+Printer.prototype.emitter = em;
+
 module.exports = Printer;
+
 
