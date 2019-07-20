@@ -5,7 +5,22 @@ module.exports = function (io) {
   const socketHelper = require('../helper/socket.helper');
   const arrayHelper = require('../helper/array.helper');
   const printerHelper = require('../helper/printer.helper');
-  const printer = new printerHelper('COM3', 9600);
+  const printer = new printerHelper('COM3', 250000);
+
+  // log event listener
+  printer.emitter.on('log', (data) => {
+    io.emit('printLog', data);
+  });
+
+  // progress event listener
+  printer.emitter.on('progress', (data) => {
+    io.emit('printProgress', data);
+  });
+
+  // status event listener
+  printer.emitter.on('status', (data) => {
+    io.emit('printStatus', data);
+  });
 
   // listen for socket connections with authentication
   //io.use(socketHelper.checkToken).on('connection', (socket) => {
@@ -53,15 +68,7 @@ module.exports = function (io) {
           });
         }
 
-        // progress event listener
-        printer.emitter.on('progress', (data) => {
-          console.log(data);
-        });
-
-        // status event listener
-        printer.emitter.on('status', (data) => {
-          console.log(data);
-        });
+        printer.reset();
 
         // print the file
         printer.printFile(__basedir + '/files/' + upload.filename);
@@ -79,6 +86,30 @@ module.exports = function (io) {
 
     });
 
+    socket.on('moveLeft', () => {
+
+    });
+
+    socket.on('moveRight', () => {
+
+    });
+
+    socket.on('moveForward', () => {
+
+    });
+
+    socket.on('moveBack', () => {
+
+    });
+
+    socket.on('moveUp', () => {
+
+    });
+
+    socket.on('moveDown', () => {
+
+    });
+
     socket.on('pausePrint', () => {
       printer.paused = true;
     });
@@ -88,7 +119,7 @@ module.exports = function (io) {
     });
 
     socket.on('cancelPrint', () => {
-      printer.stopped = true;
+      printer.stop();
     });
 
   });

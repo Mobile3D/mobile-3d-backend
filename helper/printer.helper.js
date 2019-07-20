@@ -5,6 +5,8 @@ const events = require('events');
 const em = new events.EventEmitter();
 const lineByLine = require('n-readlines');
 
+em.addListener('log', function () {});
+
 /**
  * Printer Class to symbolize the printer as an object
  * 
@@ -47,7 +49,7 @@ function Printer(port, baudRate) {
   // is triggered after every command sent to the microcontroller
   parser.on('data', function (data) {
     // convert data to string
-    console.log(data.toString());
+    em.emit('log', data.toString());
     // if there is no current command, go back
     if (!self.current) return; 
     // if there is a current command and data is 'ok'
@@ -61,7 +63,7 @@ function Printer(port, baudRate) {
   // when the microcontroller has successfully opened the port
   this.serial.on('open', () => {
     // log
-    console.log('Port open');
+    em.emit('log', 'Port open');
     setTimeout(() => {
       // get firmware information of marlinFW
       this.send('M115');
@@ -111,27 +113,32 @@ Printer.prototype.setProcessQueueCallback = function (callback) {
  * Function to work off the queue
  */
 Printer.prototype.processQueue = function () {
+
+  // only if the printer is not stopped
+  if (!this.stopped) {
   
-  // get the next command in the queue
-  let next = this.queue.shift();
-  // if there is no next object
-  if (!next) {
-      this.busy = false;
-      // if there is a callback function, execute it
-      if (this.queueCallback) this.queueCallback();
-      return;
+    // get the next command in the queue
+    let next = this.queue.shift();
+    // if there is no next object
+    if (!next) {
+        this.busy = false;
+        // if there is a callback function, execute it
+        if (this.queueCallback) this.queueCallback();
+        return;
+    }
+
+    // set next command to current
+    this.current = next;
+    // log
+    em.emit('log', next.cmd + (next.cmt ? ` ;${next.cmt}` : ''));
+
+    // send the command to the printer
+    this.serial.write(`${next.cmd}\n`);
+
+    // if there is a callack, execute it
+    if (this.queueCallback) this.queueCallback();
+
   }
-
-  // set next command to current
-  this.current = next;
-  // log
-  console.log(next.cmd + (next.cmt ? ` ;${next.cmt}` : ''));
-
-  // send the command to the printer
-  this.serial.write(`${next.cmd}\n`);
-
-  // if there is a callack, execute it
-  if (this.queueCallback) this.queueCallback();
 
 }
 
@@ -148,17 +155,16 @@ Printer.prototype.printFile = function (file) {
   em.addListener('status', function () {});
 
   // log
-  console.log('printing');
+  em.emit('log', 'printing');
   em.emit('status', 'printing');
 
   // get lines of the file
   let lines = new lineByLine(file);
 
-  let line;
   let lineNumber = 0;
   let lineCount = 0;
  
-  while (line = lines.next()) {
+  while (lines.next()) {
     lineNumber++;
   }
 
@@ -166,51 +172,49 @@ Printer.prototype.printFile = function (file) {
 
   // set a callback function
   this.setProcessQueueCallback(() => {
-    
+      
     // queue must be smaller than the queue buffer chunk size
     if (this.queue.length < this.queueBufferChunkSize) {
 
       // log
-      console.log('Reloading the queue...');
+      em.emit('log', 'Reloading the queue...');
 
       // as long as queue is smaller than the buffer size
       for (let count = 0; this.queue.length < this.queueBufferSize; count++) {
 
-        if (!this.paused) {
-
-          // get a single line
-          let line = lines.next().toString('ascii');
-          let cmt = null;
-          
-          // if there is no more line
-          if (line === 'false') {
-            // log
-            console.log('File completed');
-            // set null as callback
-            this.setProcessQueueCallback(null);
-            return;
-          }
-
-          // if line has a semikolon, there is a comment in it
-          if (line.includes(';')) {
-            const parts = line.split(';');
-            line = parts[0];
-            cmt = parts[1];
-          }
-
-          // if line is false or if there is only a space in line, go on
-          if (!line || line === 'false' || !line.replace(/\s/g, '').length) {
-            continue;
-          }
-
-          lineCount++;
-          em.emit('progress', { sent: lineCount, total: lineNumber });
-          // if everything is fine, send the line
-          this.send(line, cmt);
-
-        } else {
-          em.emit('status', 'paused');
+        // get a single line
+        let line = lines.next().toString('ascii');
+        let cmt = null;
+        
+        // if there is no more line
+        if (line === 'false') {
+          // log
+          em.emit('log', 'File completed');
+          // set null as callback
+          this.setProcessQueueCallback(null);
+          return;
         }
+
+        // if line has a semikolon, there is a comment in it
+        if (line.includes(';')) {
+          const parts = line.split(';');
+          line = parts[0];
+          cmt = parts[1];
+        }
+
+        // if line is false or if there is only a space in line, go on
+        if (!line || line === 'false' || !line.replace(/\s/g, '').length) {
+          continue;
+        }
+
+        lineCount++;
+        
+        if (this.queue.length === this.queueBufferChunkSize - 1 || lineCount === lineNumber) {
+          em.emit('progress', { sent: lineCount, total: lineNumber });
+        }
+    
+        // if everything is fine, send the line
+        this.send(line, cmt);
 
       }
     }
@@ -219,6 +223,39 @@ Printer.prototype.printFile = function (file) {
   
   // work off the queue
   this.processQueue();
+}
+
+/**
+ * Function for setting all parameters to their default values
+ */
+Printer.prototype.reset = function () {
+  this.ready = false;
+  this.queue = [];
+  this.busy = false;
+  this.paused = false;
+  this.stopped = false;
+  this.current = null;
+  this.queueCallback = null;
+}
+
+/**
+ * Function for taking the printer to its home position
+ */
+Printer.prototype.goHome = function () {
+  this.send('G28');
+}
+
+/** 
+ * Function for stopping the printer
+ */
+Printer.prototype.stop = function () {
+  this.stopped = true;
+  em.emit('status', 'stopped');
+}
+
+Printer.prototype.pause = function () {
+  this.paused = true;
+  em.emit('status', 'paused');
 }
 
 // export the event emitter
