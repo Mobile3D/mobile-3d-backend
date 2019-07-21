@@ -86,28 +86,52 @@ module.exports = function (io) {
 
     });
 
-    socket.on('moveLeft', () => {
-
+    socket.on('moveLeft', (length) => {
+      printer.moveLeft(parseFloat(length));
     });
 
-    socket.on('moveRight', () => {
-
+    socket.on('moveRight', (length) => {
+      printer.moveRight(parseFloat(length));
     });
 
-    socket.on('moveForward', () => {
-
+    socket.on('moveForward', (length) => {
+      printer.moveForward(parseFloat(length));
     });
 
-    socket.on('moveBack', () => {
-
+    socket.on('moveBack', (length) => {
+      printer.moveBack(parseFloat(length));
     });
 
-    socket.on('moveUp', () => {
-
+    socket.on('moveUp', (length) => {
+      printer.moveUp(parseFloat(length));
     });
 
-    socket.on('moveDown', () => {
+    socket.on('moveDown', (length) => {
+      printer.moveDown(parseFloat(length));
+    });
 
+    socket.on('moveXYHome', () => {
+      printer.moveXYHome();
+    });
+
+    socket.on('moveZHome', () => {
+      printer.moveZHome();
+    });
+
+    socket.on('fanOn', (speed) => {
+      printer.fanOn(parseInt(speed));
+    });
+
+    socket.on('fanOff', () => {
+      printer.fanOff();
+    });
+
+    socket.on('extrude', () => {
+      printer.extrude();
+    });
+
+    socket.on('retract', () => {
+      printer.retract();
     });
 
     socket.on('pausePrint', () => {

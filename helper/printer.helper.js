@@ -239,10 +239,93 @@ Printer.prototype.reset = function () {
 }
 
 /**
- * Function for taking the printer to its home position
+ * Function for taking the printer to its XY home position
  */
-Printer.prototype.goHome = function () {
-  this.send('G28');
+Printer.prototype.moveXYHome = function () {
+  this.send('G28 X0 Y0');
+}
+
+/**
+ * Function for taking the printer to its Z home position
+ */
+Printer.prototype.moveZHome = function () {
+  this.send('G28 Z0');
+}
+
+/**
+ * Function for moving the printer arm to the left
+ */
+Printer.prototype.moveLeft = function (length) {
+  this.send('G91');
+  this.send('G1 X' + length * (-1));
+}
+
+/**
+ * Function for moving the printer arm to the right
+ */
+Printer.prototype.moveRight = function (length) {
+  this.send('G91');
+  this.send('G1 X' + length);
+}
+
+/**
+ * Function for moving the printer arm forward
+ */
+Printer.prototype.moveForward = function (length) {
+  this.send('G91');
+  this.send('G1 Y' + length);
+}
+
+/**
+ * Function for moving the printer arm back
+ */
+Printer.prototype.moveBack = function (length) {
+  this.send('G91');
+  this.send('G1 Y' + length * (-1));
+}
+
+/**
+ * Function for moving the printer arm up
+ */
+Printer.prototype.moveUp = function (length) {
+  this.send('G91');
+  this.send('G1 Z' + length);
+}
+
+/**
+ * Function for moving the printer arm down
+ */
+Printer.prototype.moveDown = function (length) {
+  this.send('G91');
+  this.send('G1 Z' + length * (-1));
+}
+
+/**
+ * Function for turning the fan to a specific speed level
+ */
+Printer.prototype.fanOn = function (speed) {
+  this.send('M106 S' + speed);
+}
+
+/**
+ * Function for turning off the fan
+ */
+Printer.prototype.fanOff = function () {
+  this.send('M107');
+}
+
+/** 
+ * Function for extruding the ??? 
+ */
+Printer.prototype.extrude = function () {
+  
+}
+
+/** 
+ * Function for retracting the ??? 
+ */
+Printer.prototype.retract = function () {
+  
 }
 
 /** 
