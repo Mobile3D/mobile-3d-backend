@@ -10,9 +10,9 @@ const jwt = require('jsonwebtoken');
  */
 exports.checkToken = function (socket, next) {
 
-  if (socket.handshake.query && socket.handshake.query.token) {
+  if (socket.handshake.query && socket.handshake.query.token && socket.handshake.query.token.split(' ')[0].toLowerCase() === 'bearer') {
 
-    jwt.verify(socket.handshake.query.token, '965b41674c2940ab946dc0612f4dbc2bf9e2162beefd8037c27c92abf0ad72aa', function (err, decoded) {
+    jwt.verify(socket.handshake.query.token.split(' ')[1], '965b41674c2940ab946dc0612f4dbc2bf9e2162beefd8037c27c92abf0ad72aa', function (err, decoded) {
       if(err) return next(new Error('ER_TOKEN_EXPIRED'));
       socket.decoded = decoded;
       next();

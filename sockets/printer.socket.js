@@ -21,8 +21,8 @@ module.exports = function (io) {
   });
 
   // listen for socket connections with authentication
-  //io.use(socketHelper.checkToken).on('connection', (socket) => {
-  io.on('connection', (socket) => {
+  io.use(socketHelper.checkToken).on('connection', (socket) => {
+  //io.on('connection', (socket) => {
     
     // printFile event listener
     socket.on('printFile', (_id) => {
