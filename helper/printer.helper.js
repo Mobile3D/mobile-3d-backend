@@ -5,7 +5,10 @@ const events = require('events');
 const em = new events.EventEmitter();
 const lineByLine = require('n-readlines');
 
+// add listener for printing progress, status and log
 em.addListener('log', function () {});
+em.addListener('progress', function () {});
+em.addListener('status', function () {});
 
 /**
  * Printer Class to symbolize the printer as an object
@@ -17,12 +20,13 @@ em.addListener('log', function () {});
  * @prop {boolean} ready if the printer is currently printing or ready
  * @prop {array} queue the queue with all commands of a g-code file seperated by '\n'
  * @prop {boolean} busy if the api is currently sending a command to the printer
- * @prop {boolean} paused if the printer should pause printing
  * @prop {boolean} stopped if the printer should stop printing
  * @prop {object} current the current command in the queue
  * @prop {object} queueCallback parameter for callback function of setProcessQueueCallback()
  * @prop {int} queueBufferSize the buffer size of the printers microcontroller
  * @prop {int} queueBufferChunkSize the buffer chunk size of the printers microcontroller
+ * @prop {int} lineNumber the number of processable lines a file has
+ * @prop {int} lineCount the number of lines that have been processed
  */
 function Printer(port, baudRate) {
 
@@ -34,12 +38,13 @@ function Printer(port, baudRate) {
   this.ready = false;
   this.queue = [];
   this.busy = false;
-  this.paused = false;
   this.stopped = false;
   this.current = null;
   this.queueCallback = null;
   this.queueBufferSize = 20;
   this.queueBufferChunkSize = 10;
+  this.lineNumber = 0;
+  this.lineCount = 0;
 
   let self = this;
   // initialize a parser and pipe it with readline
@@ -54,6 +59,12 @@ function Printer(port, baudRate) {
     if (!self.current) return; 
     // if there is a current command and data is 'ok'
     else if (data.toString() === 'ok') {
+
+      if (self.isStopped()) {
+        em.emit('status', 'stopped');
+        self.reset();
+      }
+
       self.current = null;
       // work off the queue
       self.processQueue();
@@ -68,6 +79,7 @@ function Printer(port, baudRate) {
       // get firmware information of marlinFW
       this.send('M115');
       this.ready = true;
+      em.emit('status', 'ready');
     }, 5000);
   });
 
@@ -82,6 +94,36 @@ function Printer(port, baudRate) {
  */
 Printer.prototype.isReady = function () {
   return this.ready;
+}
+
+/**
+ * Function for checking, if the printer is busy
+ * 
+ * @returns {boolean}
+ */
+Printer.prototype.isBusy = function () {
+  return this.busy;
+}
+
+/**
+ * Function for checking, if the printer has been stopped
+ * 
+ * @returns {boolean}
+ */
+Printer.prototype.isStopped = function () {
+  return this.stopped;
+}
+
+/** 
+ * Function for getting the progress of the file printed
+ * 
+ * @returns {object} lineCount and lineNumber
+ */
+Printer.prototype.getProgress = function () {
+  return {
+    sent: this.lineCount,
+    total: this.lineNumber
+  };
 }
 
 /**
@@ -150,22 +192,16 @@ Printer.prototype.processQueue = function () {
  */
 Printer.prototype.printFile = function (file) {
 
-  // add listener for printing progress
-  em.addListener('progress', function () {});
-  em.addListener('status', function () {});
-
   // log
-  em.emit('log', 'printing');
   em.emit('status', 'printing');
+  this.ready = false;
 
   // get lines of the file
   let lines = new lineByLine(file);
-
-  let lineNumber = 0;
-  let lineCount = 0;
+  let l;
  
-  while (lines.next()) {
-    lineNumber++;
+  while (l = lines.next()) {
+    if(l.toString('ascii').charAt(0) !== ';') this.lineNumber++;
   }
 
   lines = new lineByLine(file);
@@ -190,6 +226,8 @@ Printer.prototype.printFile = function (file) {
         if (line === 'false') {
           // log
           em.emit('log', 'File completed');
+          em.emit('status', 'completed');
+          this.reset();
           // set null as callback
           this.setProcessQueueCallback(null);
           return;
@@ -207,10 +245,10 @@ Printer.prototype.printFile = function (file) {
           continue;
         }
 
-        lineCount++;
+        this.lineCount++;
         
-        if (this.queue.length === this.queueBufferChunkSize - 1 || lineCount === lineNumber) {
-          em.emit('progress', { sent: lineCount, total: lineNumber });
+        if (this.queue.length === this.queueBufferChunkSize - 1 || this.lineCount === this.lineNumber) {
+          em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
         }
     
         // if everything is fine, send the line
@@ -229,13 +267,16 @@ Printer.prototype.printFile = function (file) {
  * Function for setting all parameters to their default values
  */
 Printer.prototype.reset = function () {
-  this.ready = false;
+  this.ready = true;
   this.queue = [];
   this.busy = false;
-  this.paused = false;
   this.stopped = false;
   this.current = null;
   this.queueCallback = null;
+  this.lineNumber = 0;
+  this.lineCount = 0;
+
+  em.emit('status', 'ready');
 }
 
 /**
@@ -254,6 +295,8 @@ Printer.prototype.moveZHome = function () {
 
 /**
  * Function for moving the printer arm to the left
+ * 
+ * @param {float} length the length the printer should move
  */
 Printer.prototype.moveLeft = function (length) {
   this.send('G91');
@@ -262,6 +305,8 @@ Printer.prototype.moveLeft = function (length) {
 
 /**
  * Function for moving the printer arm to the right
+ * 
+ * @param {float} length the length the printer should move
  */
 Printer.prototype.moveRight = function (length) {
   this.send('G91');
@@ -270,6 +315,8 @@ Printer.prototype.moveRight = function (length) {
 
 /**
  * Function for moving the printer arm forward
+ * 
+ * @param {float} length the length the printer should move
  */
 Printer.prototype.moveForward = function (length) {
   this.send('G91');
@@ -278,6 +325,8 @@ Printer.prototype.moveForward = function (length) {
 
 /**
  * Function for moving the printer arm back
+ * 
+ * @param {float} length the length the printer should move
  */
 Printer.prototype.moveBack = function (length) {
   this.send('G91');
@@ -286,6 +335,8 @@ Printer.prototype.moveBack = function (length) {
 
 /**
  * Function for moving the printer arm up
+ * 
+ * @param {float} length the length the printer should move
  */
 Printer.prototype.moveUp = function (length) {
   this.send('G91');
@@ -294,6 +345,8 @@ Printer.prototype.moveUp = function (length) {
 
 /**
  * Function for moving the printer arm down
+ * 
+ * @param {float} length the length the printer should move
  */
 Printer.prototype.moveDown = function (length) {
   this.send('G91');
@@ -302,6 +355,8 @@ Printer.prototype.moveDown = function (length) {
 
 /**
  * Function for turning the fan to a specific speed level
+ * 
+ * @param {int} speed the fan speed
  */
 Printer.prototype.fanOn = function (speed) {
   this.send('M106 S' + speed);
@@ -312,6 +367,15 @@ Printer.prototype.fanOn = function (speed) {
  */
 Printer.prototype.fanOff = function () {
   this.send('M107');
+}
+
+/**
+ * Function for sending a custom command to the printer
+ * 
+ * @param {string} cmd the command to send
+ */
+Printer.prototype.sendManualCommand = function (cmd) {
+  this.send(cmd);
 }
 
 /** 
@@ -333,12 +397,7 @@ Printer.prototype.retract = function () {
  */
 Printer.prototype.stop = function () {
   this.stopped = true;
-  em.emit('status', 'stopped');
-}
-
-Printer.prototype.pause = function () {
-  this.paused = true;
-  em.emit('status', 'paused');
+  em.emit('status', 'stopping');
 }
 
 // export the event emitter

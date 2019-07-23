@@ -4,21 +4,19 @@ module.exports = function (io) {
   const fs = require('fs');
   const socketHelper = require('../helper/socket.helper');
   const arrayHelper = require('../helper/array.helper');
-  const printerHelper = require('../helper/printer.helper');
-  const printer = new printerHelper('COM3', 250000);
 
   // log event listener
-  printer.emitter.on('log', (data) => {
+  __printer.emitter.on('log', (data) => {
     io.emit('printLog', data);
   });
 
   // progress event listener
-  printer.emitter.on('progress', (data) => {
+  __printer.emitter.on('progress', (data) => {
     io.emit('printProgress', data);
   });
 
   // status event listener
-  printer.emitter.on('status', (data) => {
+  __printer.emitter.on('status', (data) => {
     io.emit('printStatus', data);
   });
 
@@ -68,10 +66,8 @@ module.exports = function (io) {
           });
         }
 
-        printer.reset();
-
         // print the file
-        printer.printFile(__basedir + '/files/' + upload.filename);
+        __printer.printFile(__basedir + '/files/' + upload.filename);
 
         // emit a success event
         socket.emit('printSuccess', {
@@ -87,63 +83,59 @@ module.exports = function (io) {
     });
 
     socket.on('moveLeft', (length) => {
-      printer.moveLeft(parseFloat(length));
+      __printer.moveLeft(parseFloat(length));
     });
 
     socket.on('moveRight', (length) => {
-      printer.moveRight(parseFloat(length));
+      __printer.moveRight(parseFloat(length));
     });
 
     socket.on('moveForward', (length) => {
-      printer.moveForward(parseFloat(length));
+      __printer.moveForward(parseFloat(length));
     });
 
     socket.on('moveBack', (length) => {
-      printer.moveBack(parseFloat(length));
+      __printer.moveBack(parseFloat(length));
     });
 
     socket.on('moveUp', (length) => {
-      printer.moveUp(parseFloat(length));
+      __printer.moveUp(parseFloat(length));
     });
 
     socket.on('moveDown', (length) => {
-      printer.moveDown(parseFloat(length));
+      __printer.moveDown(parseFloat(length));
     });
 
     socket.on('moveXYHome', () => {
-      printer.moveXYHome();
+      __printer.moveXYHome();
     });
 
     socket.on('moveZHome', () => {
-      printer.moveZHome();
+      __printer.moveZHome();
     });
 
     socket.on('fanOn', (speed) => {
-      printer.fanOn(parseInt(speed));
+      __printer.fanOn(parseInt(speed));
     });
 
     socket.on('fanOff', () => {
-      printer.fanOff();
+      __printer.fanOff();
+    });
+
+    socket.on('sendManualCommand', (cmd) => {
+      __printer.sendManualCommand(cmd);
     });
 
     socket.on('extrude', () => {
-      printer.extrude();
+      __printer.extrude();
     });
 
     socket.on('retract', () => {
-      printer.retract();
-    });
-
-    socket.on('pausePrint', () => {
-      printer.paused = true;
-    });
-
-    socket.on('unpausePrint', () => {
-      printer.paused = false;
+      __printer.retract();
     });
 
     socket.on('cancelPrint', () => {
-      printer.stop();
+      __printer.stop();
     });
 
   });
