@@ -25,10 +25,10 @@ module.exports = function (io) {
   io.on('connection', (socket) => {
     
     // printFile event listener
-    socket.on('printFile', (data) => {
+    socket.on('printFile', (_id) => {
       
       // if required parameters are missing
-      if (data._id === undefined) {
+      if (_id === undefined || _id === null) {
         // emit an error
         return socket.emit('printError', {
           error: {
@@ -54,7 +54,7 @@ module.exports = function (io) {
         // convert string to object
         let uploads = JSON.parse(uploadsString);
         // get requested upload
-        let upload = arrayHelper.findById(parseInt(data._id), uploads);
+        let upload = arrayHelper.findById(parseInt(_id), uploads);
         
         // if upload has not been found
         if (!upload) {

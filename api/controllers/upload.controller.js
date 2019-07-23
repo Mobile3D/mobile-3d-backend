@@ -66,7 +66,7 @@ exports.add = function (req, res) {
       }
 
       // return file object
-      return res.status(200).json(newUpload);
+      return res.status(201).json(newUpload);
 
     });
 
@@ -132,7 +132,7 @@ exports.get = function (req, res) {
     
     // if upload has not been found
     if (!upload) {
-      return res.status(400).json({
+      return res.status(404).json({
         error: {
           code: 'ER_UPLOAD_NOT_FOUND',
           message: 'ER_UPLOAD_NOT_FOUND: There is no upload with this id.'
@@ -175,7 +175,7 @@ exports.delete = function (req, res) {
     
     // if delete is not successfull
     if (!arrayHelper.delete(parseInt(req.params.upload_id), uploads)) {
-      return res.status(400).json({
+      return res.status(404).json({
         error: {
           code: 'ER_UPLOAD_NOT_FOUND',
           message: 'ER_UPLOAD_NOT_FOUND: There is no upload with this id.'
