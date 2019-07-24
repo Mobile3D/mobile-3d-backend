@@ -20,6 +20,7 @@ em.addListener('status', function () {});
  * @prop {boolean} ready if the printer is currently printing or ready
  * @prop {array} queue the queue with all commands of a g-code file seperated by '\n'
  * @prop {boolean} busy if the api is currently sending a command to the printer
+ * @prop {string} status the current status of the printer
  * @prop {boolean} stopped if the printer should stop printing
  * @prop {object} current the current command in the queue
  * @prop {object} queueCallback parameter for callback function of setProcessQueueCallback()
@@ -38,6 +39,7 @@ function Printer(port, baudRate) {
   this.ready = false;
   this.queue = [];
   this.busy = false;
+  this.status = 'booting';
   this.stopped = false;
   this.current = null;
   this.queueCallback = null;
@@ -61,7 +63,8 @@ function Printer(port, baudRate) {
     else if (data.toString() === 'ok') {
 
       if (self.isStopped()) {
-        em.emit('status', 'stopped');
+        self.status = 'stopped';
+        self.emitStatus();
         self.reset();
       }
 
@@ -79,7 +82,8 @@ function Printer(port, baudRate) {
       // get firmware information of marlinFW
       this.send('M115');
       this.ready = true;
-      em.emit('status', 'ready');
+      this.status = 'ready';
+      this.emitStatus();
     }, 5000);
   });
 
@@ -193,7 +197,8 @@ Printer.prototype.processQueue = function () {
 Printer.prototype.printFile = function (file) {
 
   // log
-  em.emit('status', 'printing');
+  this.status = 'printing';
+  this.emitStatus();
   this.ready = false;
 
   // get lines of the file
@@ -226,7 +231,8 @@ Printer.prototype.printFile = function (file) {
         if (line === 'false') {
           // log
           em.emit('log', 'File completed');
-          em.emit('status', 'completed');
+          this.status = 'completed';
+          this.emitStatus();
           this.reset();
           // set null as callback
           this.setProcessQueueCallback(null);
@@ -276,7 +282,8 @@ Printer.prototype.reset = function () {
   this.lineNumber = 0;
   this.lineCount = 0;
 
-  em.emit('status', 'ready');
+  this.status = 'ready';
+  this.emitStatus();
 }
 
 /**
@@ -379,17 +386,17 @@ Printer.prototype.sendManualCommand = function (cmd) {
 }
 
 /** 
- * Function for extruding the ??? 
+ * Function for extruding the E-Axis
  */
-Printer.prototype.extrude = function () {
-  
+Printer.prototype.extrude = function (length) {
+  this.send('G1 E' + length);
 }
 
 /** 
- * Function for retracting the ??? 
+ * Function for retracting the E-Axis
  */
-Printer.prototype.retract = function () {
-  
+Printer.prototype.retract = function (length) {
+  this.send('G1 E' + length * (-1));
 }
 
 /** 
@@ -397,7 +404,12 @@ Printer.prototype.retract = function () {
  */
 Printer.prototype.stop = function () {
   this.stopped = true;
-  em.emit('status', 'stopping');
+  this.status = 'stopping';
+  this.emitStatus();
+}
+
+Printer.prototype.emitStatus = function () {
+  em.emit('status', this.status);
 }
 
 // export the event emitter

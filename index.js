@@ -42,8 +42,8 @@ const loginLimiter = rateLimit({
 app.use(userHelper.checkToken);
 
 // set api limits to the corresponding routes
-app.use('/v1/', apiLimiter);
-app.use('/v1/auth/login', loginLimiter);
+app.use('/api', apiLimiter);
+app.use('/api/v1/auth/login', loginLimiter);
 
 // set api headers for protection against attacks and implement cors policy
 app.use(helmet());
@@ -58,7 +58,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 // set the /uploads directory to static
-app.use('/uploads', express.static('./uploads'));
+app.use('/files', express.static('./files'));
 
 /** @TODO routes and sockets */
 // implement api routes to the main application

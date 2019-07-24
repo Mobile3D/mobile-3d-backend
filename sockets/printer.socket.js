@@ -84,54 +84,67 @@ module.exports = function (io) {
 
     socket.on('moveLeft', (length) => {
       __printer.moveLeft(parseFloat(length));
+      io.emit('printStatus', 'moving left');
     });
 
     socket.on('moveRight', (length) => {
       __printer.moveRight(parseFloat(length));
+      io.emit('printStatus', 'moving right');
     });
 
     socket.on('moveForward', (length) => {
       __printer.moveForward(parseFloat(length));
+      io.emit('printStatus', 'moving forward');
     });
 
     socket.on('moveBack', (length) => {
       __printer.moveBack(parseFloat(length));
+      io.emit('printStatus', 'moving back');
     });
 
     socket.on('moveUp', (length) => {
       __printer.moveUp(parseFloat(length));
+      io.emit('printStatus', 'moving up');
     });
 
     socket.on('moveDown', (length) => {
       __printer.moveDown(parseFloat(length));
+      io.emit('printStatus', 'moving down');
     });
 
     socket.on('moveXYHome', () => {
       __printer.moveXYHome();
+      io.emit('printStatus', 'moving XY home');
     });
 
     socket.on('moveZHome', () => {
       __printer.moveZHome();
+      io.emit('printStatus', 'moving Z home');
     });
 
     socket.on('fanOn', (speed) => {
       __printer.fanOn(parseInt(speed));
+      io.emit('printStatus', 'turning fan on');
     });
 
     socket.on('fanOff', () => {
       __printer.fanOff();
+      io.emit('printStatus', 'turning fan off');
     });
 
     socket.on('sendManualCommand', (cmd) => {
       __printer.sendManualCommand(cmd);
+      io.emit('printStatus', 'sending: ' + cmd);
     });
 
-    socket.on('extrude', () => {
-      __printer.extrude();
+    socket.on('extrude', (length) => {
+      __printer.extrude(parseFloat(length));
+      io.emit('printStatus', 'extruding');
     });
 
-    socket.on('retract', () => {
-      __printer.retract();
+    socket.on('retract', (length) => {
+      __printer.retract(parseFloat(length));
+      io.emit('printStatus', 'retracting');
     });
 
     socket.on('cancelPrint', () => {

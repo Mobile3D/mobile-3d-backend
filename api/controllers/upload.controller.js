@@ -28,7 +28,8 @@ exports.add = function (req, res) {
     filename: req.file.filename,
     path: req.file.path,
     size: req.file.size,
-    mimetype: req.file.mimetype
+    mimetype: req.file.mimetype,
+    created_at: Date.now()
   }
 
   // read the uploads file

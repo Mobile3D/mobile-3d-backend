@@ -13,5 +13,7 @@ exports.getStatus = function (req, res) {
 }
 
 exports.getProgress = function (req, res) {
-  return res.json(__printer.getProgress());
+  return res.json({
+    progress: __printer.getProgress()
+  });
 }

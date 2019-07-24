@@ -26,11 +26,11 @@ module.exports = function (app) {
     storage: storage
   });
 
-  app.route('/v1/uploads')
+  app.route('/api/v1/uploads')
     .get(user.protected, upload.getAll)
     .post(user.protected, mUpload.single('file'), upload.add);
 
-  app.route('/v1/uploads/:upload_id')
+  app.route('/api/v1/uploads/:upload_id')
     .get(user.protected, upload.get)
     .delete(user.protected, upload.delete);
 
