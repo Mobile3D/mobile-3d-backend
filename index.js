@@ -9,6 +9,7 @@ const io = require('socket.io')(http);
 const rateLimit = require('express-rate-limit');
 const config = require('./config')();
 const userHelper = require('./helper/user.helper');
+const apiHelper = require('./helper/api.helper');
 
 // port and root directory settings
 const port = process.env.PORT || __port;
@@ -72,6 +73,8 @@ printerRoutes(app);
 
 const printerSocket = require('./sockets/printer.socket');
 printerSocket(io);
+
+app.use(apiHelper.checkRoute);
 
 // start the http server
 http.listen(port);
