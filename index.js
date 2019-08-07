@@ -15,6 +15,10 @@ const apiHelper = require('./helper/api.helper');
 const port = process.env.PORT || __port;
 global.__basedir = __dirname;
 
+// set api headers for protection against attacks and implement cors policy
+app.use(helmet());
+app.use(cors());
+
 // request limit for all api routes (10 requests per second)
 const apiLimiter = rateLimit({
   windowMs: 1 * 1000, // 1 second
@@ -45,12 +49,6 @@ app.use(userHelper.checkToken);
 // set api limits to the corresponding routes
 app.use('/api', apiLimiter);
 app.use('/api/v1/auth/login', loginLimiter);
-
-// set api headers for protection against attacks and implement cors policy
-app.use(helmet());
-app.use(cors({
-  origin: '*'
-}));
 
 // configure body parser, to send json back to the client
 app.use(bodyParser.urlencoded({

@@ -35,7 +35,7 @@ exports.register = function (req, res) {
   let newUser = {
     username: req.body.username,
     password: bcryptjs.hashSync(req.body.password, 10),
-    fistname: req.body.firstname,
+    firstname: req.body.firstname,
     lastname: req.body.lastname,
     admin: req.body.admin === 'true' ? true : false,
     disabled: false,
