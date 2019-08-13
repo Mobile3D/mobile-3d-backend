@@ -10,10 +10,16 @@ const rateLimit = require('express-rate-limit');
 const config = require('./config')();
 const userHelper = require('./helper/user.helper');
 const apiHelper = require('./helper/api.helper');
+const printerHelper = require('./helper/printer.helper');
+const connectionHelper = require('./helper/connection.helper');
 
 // port and root directory settings
-const port = process.env.PORT || __port;
 global.__basedir = __dirname;
+const port = process.env.PORT || __port;
+
+// read connection details from file and initialize a new 3D-Printer
+const connection = connectionHelper.getConnection();
+global.__printer = new printerHelper(connection.port, parseInt(connection.baudrate));
 
 // set api headers for protection against attacks and implement cors policy
 app.use(helmet());
@@ -59,15 +65,16 @@ app.use(bodyParser.json());
 // set the /uploads directory to static
 app.use('/files', express.static('./files'));
 
-/** @TODO routes and sockets */
 // implement api routes to the main application
 const userRoutes = require('./api/routes/user.routes');
 const uploadRoutes = require('./api/routes/upload.routes');
 const printerRoutes = require('./api/routes/printer.routes');
+const connectionRoutes = require('./api/routes/connection.routes');
 
 userRoutes(app);
 uploadRoutes(app);
 printerRoutes(app);
+connectionRoutes(app);
 
 const printerSocket = require('./sockets/printer.socket');
 printerSocket(io);
