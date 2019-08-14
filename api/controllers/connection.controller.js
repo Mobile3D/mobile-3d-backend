@@ -1,5 +1,14 @@
+// required node packages
 const fs = require('fs');
 
+/**
+ * Function to set connection details for the 3D-Printer
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} error or the new connection details
+ */
 exports.setConnection = function (req, res) {
 
   // check if required parameters are given
@@ -41,6 +50,14 @@ exports.setConnection = function (req, res) {
 
 }
 
+/**
+ * Function to get connection details for the 3D-Printer
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} error or the connection details
+ */
 exports.getConnection = function (req, res) {
 
   // read the file

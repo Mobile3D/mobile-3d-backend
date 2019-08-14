@@ -11,4 +11,8 @@ module.exports = function (app) {
   app.route('/api/v1/printer/progress')
     .get(user.protected, printer.getProgress);
 
+  app.route('/api/v1/printer/info')
+    .get(user.protected, printer.getInfo)
+    .post(user.protected, printer.setInfo);
+
 }
