@@ -387,6 +387,8 @@ Printer.prototype.sendManualCommand = function (cmd) {
 
 /** 
  * Function for extruding the E-Axis
+ * 
+ * @param {float} length the length to extrude
  */
 Printer.prototype.extrude = function (length) {
   this.send('G1 E' + length);
@@ -394,9 +396,29 @@ Printer.prototype.extrude = function (length) {
 
 /** 
  * Function for retracting the E-Axis
+ * 
+ * @param {float} length the length to retract
  */
 Printer.prototype.retract = function (length) {
   this.send('G1 E' + length * (-1));
+}
+
+/**
+ * Function for setting the hotend temperature
+ * 
+ * @param {int} temp the temperature to set
+ */
+Printer.prototype.setHotendTemperature = function (temp) {
+  this.send('M104 S' + temp);
+}
+
+/**
+ * Function for setting the heatend-temperature
+ * 
+ * @param {int} temp the temperature to set
+ */
+Printer.prototype.setHeatbedTemperature = function (temp) {
+  this.send('M140 S' + temp);
 }
 
 /** 

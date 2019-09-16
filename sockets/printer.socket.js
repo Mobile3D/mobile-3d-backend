@@ -147,6 +147,16 @@ module.exports = function (io) {
       io.emit('printStatus', 'retracting');
     });
 
+    socket.on('setHotendTemperature', (temp) => {
+      __printer.setHotendTemperature(parseInt(temp));
+      io.emit('printStatus', 'set hotend temperature to ' + temp);
+    });
+
+    socket.on('setHeatendTemperature', (temp) => {
+      __printer.setHeatendTemperature(parseInt(temp));
+      io.emit('printStatus', 'set heatend temperature to ' + temp);
+    });
+
     socket.on('cancelPrint', () => {
       __printer.stop();
     });
