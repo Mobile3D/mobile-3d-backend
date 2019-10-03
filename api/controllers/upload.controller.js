@@ -26,6 +26,7 @@ exports.add = function (req, res) {
   let newUpload = {
     name: req.file.originalname.split('.')[0],
     filename: req.file.filename,
+    originalname: req.file.originalname,
     path: req.file.path,
     size: req.file.size,
     mimetype: req.file.mimetype,
