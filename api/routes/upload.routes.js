@@ -21,9 +21,20 @@ module.exports = function (app) {
     }
   });
 
+  const fileFilter = (req, file, cb) => {
+    let parts = file.originalname.split('.');
+    let fileEnding = parts[parts.length - 1].toLowerCase();
+    if(fileEnding === 'gcode' || fileEnding === 'gco' || fileEnding === 'gc' || fileEnding === 'g') {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  };
+
   // create multer upload object
   const mUpload = multer({
-    storage: storage
+    storage: storage,
+    fileFilter: fileFilter
   });
 
   app.route('/api/v1/uploads')

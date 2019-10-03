@@ -89,7 +89,7 @@ exports.register = function (req, res) {
       // hide password from output
       newUser.password = undefined;
       // return user object
-      return res.status(200).json(newUser);
+      return res.status(201).json(newUser);
     });
 
   });
@@ -268,16 +268,30 @@ exports.delete = function (req, res) {
     }
 
     let users = JSON.parse(data);
+    let user = arrayHelper.findById(parseInt(req.params.user_id), users);
 
     // if user has not been found
-    if (!arrayHelper.delete(parseInt(req.params.user_id), users)) {
-      return res.status(400).json({
+    if (!user) {
+      return res.status(404).json({
         error: {
           code: 'ER_USER_NOT_FOUND',
           message: 'ER_USER_NOT_FOUND: There is no user with this id.'
         }
       });
     }
+
+    // if user to delete is currently signed in
+    if (user._id === req.user._id) {
+      return res.status(405).json({
+        error: {
+          code: 'ER_USER_TO_DELETE_SIGNED_IN',
+          message: 'ER_USER_TO_DELETE_SIGNED_IN: The user to delete is currently signed in.'
+        }
+      });
+    }
+
+    // delete the user
+    arrayHelper.delete(parseInt(req.params.user_id), users);
 
     // write the file
     fs.writeFile(__basedir + '/data/users.json', JSON.stringify(users), function (err) {
