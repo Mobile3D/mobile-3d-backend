@@ -147,6 +147,12 @@ exports.login = function (req, res) {
       });
     }
 
+    let expiresIn = 86400;
+
+    if (req.body.remember) {
+      expiresIn = 86400 * 365;
+    }
+
     // return a signed jwt
     return res.json({
       token: jwt.sign({
@@ -156,9 +162,9 @@ exports.login = function (req, res) {
         lastname: user.lastname,
         admin: user.admin,
         timestamp: user.timestamp
-      }, '965b41674c2940ab946dc0612f4dbc2bf9e2162beefd8037c27c92abf0ad72aa', {expiresIn: 86400})
+      }, '965b41674c2940ab946dc0612f4dbc2bf9e2162beefd8037c27c92abf0ad72aa', {expiresIn: expiresIn})
     });
-
+    
   });
 
 }
