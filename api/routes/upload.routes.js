@@ -22,10 +22,16 @@ module.exports = function (app) {
   });
 
   const fileFilter = (req, file, cb) => {
-    let parts = file.originalname.split('.');
-    let fileEnding = parts[parts.length - 1].toLowerCase();
-    if(fileEnding === 'gcode' || fileEnding === 'gco' || fileEnding === 'gc' || fileEnding === 'g') {
-      cb(null, true);
+    if (file.originalname.indexOf('.') !== -1) {
+     
+      let parts = file.originalname.split('.');
+      let fileEnding = parts[parts.length - 1].toLowerCase();
+      if(fileEnding === 'gcode' || fileEnding === 'gco' || fileEnding === 'gc' || fileEnding === 'g') {
+        cb(null, true);
+      } else {
+        cb(null, false);
+      }
+
     } else {
       cb(null, false);
     }
