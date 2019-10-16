@@ -89,11 +89,13 @@ exports.setInfo = function (req, res) {
 exports.getStatus = function (req, res) {
 
   const ready = __printer.isReady();
+  const connected = __printer.isConnected();
   const busy = __printer.isBusy();
 
   return res.json({
     status: {
       ready: ready,
+      connected: connected,
       busy: busy
     }
   });
