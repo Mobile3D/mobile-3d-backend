@@ -18,6 +18,7 @@ em.addListener('status', function () {});
  * 
  * @prop {object} serial parameter for the serial port object
  * @prop {boolean} ready if the printer is currently printing or ready
+ * @prop {boolean} connected if the printer is connected
  * @prop {array} queue the queue with all commands of a g-code file seperated by '\n'
  * @prop {boolean} busy if the api is currently sending a command to the printer
  * @prop {string} status the current status of the printer
@@ -37,6 +38,7 @@ function Printer(port, baudRate) {
     baudRate: baudRate
   });
   this.ready = false;
+  this.connected = false;
   this.queue = [];
   this.busy = false;
   this.status = 'booting';
@@ -82,6 +84,7 @@ function Printer(port, baudRate) {
       // get firmware information of marlinFW
       this.send('M115');
       this.ready = true;
+      this.connected = true;
       this.status = 'ready';
       this.emitStatus();
     }, 5000);
@@ -98,6 +101,15 @@ function Printer(port, baudRate) {
  */
 Printer.prototype.isReady = function () {
   return this.ready;
+}
+
+/**
+ * Function for checking, if the printer is connected
+ * 
+ * @returns {boolean}
+ */
+Printer.prototype.isConnected = function () {
+  return this.connected;
 }
 
 /**
