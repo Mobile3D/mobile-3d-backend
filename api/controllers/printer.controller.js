@@ -93,11 +93,9 @@ exports.getStatus = function (req, res) {
   const busy = __printer.isBusy();
 
   return res.json({
-    status: {
-      ready: ready,
-      connected: connected,
-      busy: busy
-    }
+    ready: ready,
+    connected: connected,
+    busy: busy
   });
 
 }
