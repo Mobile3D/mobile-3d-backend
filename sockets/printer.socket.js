@@ -84,32 +84,32 @@ module.exports = function (io) {
 
     socket.on('moveLeft', (length) => {
       __printer.moveLeft(parseFloat(length));
-      io.emit('printStatus', 'moving left');
+      io.emit('printStatus', 'moving ' + length + ' left');
     });
 
     socket.on('moveRight', (length) => {
       __printer.moveRight(parseFloat(length));
-      io.emit('printStatus', 'moving right');
+      io.emit('printStatus', 'moving ' + length + ' right');
     });
 
     socket.on('moveForward', (length) => {
       __printer.moveForward(parseFloat(length));
-      io.emit('printStatus', 'moving forward');
+      io.emit('printStatus', 'moving ' + length + ' forward');
     });
 
     socket.on('moveBack', (length) => {
       __printer.moveBack(parseFloat(length));
-      io.emit('printStatus', 'moving back');
+      io.emit('printStatus', 'moving ' + length + ' back');
     });
 
     socket.on('moveUp', (length) => {
       __printer.moveUp(parseFloat(length));
-      io.emit('printStatus', 'moving up');
+      io.emit('printStatus', 'moving ' + length + ' up');
     });
 
     socket.on('moveDown', (length) => {
       __printer.moveDown(parseFloat(length));
-      io.emit('printStatus', 'moving down');
+      io.emit('printStatus', 'moving ' + length + ' down');
     });
 
     socket.on('moveXYHome', () => {
@@ -124,7 +124,7 @@ module.exports = function (io) {
 
     socket.on('fanOn', (speed) => {
       __printer.fanOn(parseInt(speed));
-      io.emit('printStatus', 'turning fan on');
+      io.emit('printStatus', 'turning fan on with a speed of ' + speed);
     });
 
     socket.on('fanOff', () => {
@@ -139,12 +139,12 @@ module.exports = function (io) {
 
     socket.on('extrude', (length) => {
       __printer.extrude(parseFloat(length));
-      io.emit('printStatus', 'extruding');
+      io.emit('printStatus', 'extruding ' + length);
     });
 
     socket.on('retract', (length) => {
       __printer.retract(parseFloat(length));
-      io.emit('printStatus', 'retracting');
+      io.emit('printStatus', 'retracting ' + length);
     });
 
     socket.on('setHotendTemperature', (temp) => {
@@ -152,9 +152,9 @@ module.exports = function (io) {
       io.emit('printStatus', 'set hotend temperature to ' + temp);
     });
 
-    socket.on('setHeatendTemperature', (temp) => {
-      __printer.setHeatendTemperature(parseInt(temp));
-      io.emit('printStatus', 'set heatend temperature to ' + temp);
+    socket.on('setHeatbedTemperature', (temp) => {
+      __printer.setHeatbedTemperature(parseInt(temp));
+      io.emit('printStatus', 'set heatbed temperature to ' + temp);
     });
 
     socket.on('cancelPrint', () => {

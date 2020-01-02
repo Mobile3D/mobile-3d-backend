@@ -80,15 +80,24 @@ function Printer(port, baudRate) {
   this.serial.on('open', () => {
     // log
     em.emit('log', 'Port open');
+    this.status = 'connecting';
+    this.emitStatus();
     setTimeout(() => {
       // get firmware information of marlinFW
       this.send('M115');
       this.ready = true;
       this.connected = true;
-      this.status = 'ready';
+      this.status = 'connected';
       this.emitStatus();
     }, 5000);
   });
+
+  this.serial.on('close', () => {
+    this.ready = false;
+    this.connected = false;
+    this.status = 'disconnected';
+    this.emitStatus();
+  })
 
 }
 
@@ -425,7 +434,7 @@ Printer.prototype.setHotendTemperature = function (temp) {
 }
 
 /**
- * Function for setting the heatend-temperature
+ * Function for setting the heatbed-temperature
  * 
  * @param {int} temp the temperature to set
  */
