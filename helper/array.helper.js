@@ -38,7 +38,7 @@ exports.findById = function (id, arr) {
  */
 exports.delete = function (id, arr) {
   if (findById(id, arr)) {
-    arr.splice(id - 1, 1);
+    arr.splice(getIndex(id, arr), 1);
     return true;
   }
   return false;
@@ -56,6 +56,23 @@ function findById(id, arr) {
   for (let i=0; i < arr.length; i++) {
     if (arr[i]._id === id) {
       return arr[i];
+    }
+  }
+  return false;
+}
+
+/** 
+ * Function to find an index of an id
+ * 
+ * @param {int} id id of the object
+ * @param {array} arr array with objects
+ * 
+ * @returns {object} false or the found index
+ */
+function getIndex(id, arr) {
+  for (let i=0; i < arr.length; i++) {
+    if (arr[i]._id === id) {
+      return i;
     }
   }
   return false;

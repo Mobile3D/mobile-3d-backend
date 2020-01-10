@@ -161,6 +161,14 @@ module.exports = function (io) {
       __printer.stop();
     });
 
+    socket.on('loadFile', (file) => {
+      io.emit('newFileToPrint', file);
+    });
+
+    socket.on('deleteLoadedFile', () => {
+      io.emit('deleteLoadedFile');
+    })
+
   });
 
 }
