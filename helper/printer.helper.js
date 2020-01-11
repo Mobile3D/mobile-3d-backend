@@ -329,6 +329,7 @@ Printer.prototype.moveZHome = function () {
 Printer.prototype.moveLeft = function (length) {
   this.send('G91');
   this.send('G1 X' + length * (-1));
+  this.send('G90');
 }
 
 /**
@@ -339,6 +340,7 @@ Printer.prototype.moveLeft = function (length) {
 Printer.prototype.moveRight = function (length) {
   this.send('G91');
   this.send('G1 X' + length);
+  this.send('G90');
 }
 
 /**
@@ -349,6 +351,7 @@ Printer.prototype.moveRight = function (length) {
 Printer.prototype.moveForward = function (length) {
   this.send('G91');
   this.send('G1 Y' + length);
+  this.send('G90');
 }
 
 /**
@@ -359,6 +362,7 @@ Printer.prototype.moveForward = function (length) {
 Printer.prototype.moveBack = function (length) {
   this.send('G91');
   this.send('G1 Y' + length * (-1));
+  this.send('G90');
 }
 
 /**
@@ -369,6 +373,7 @@ Printer.prototype.moveBack = function (length) {
 Printer.prototype.moveUp = function (length) {
   this.send('G91');
   this.send('G1 Z' + length);
+  this.send('G90');
 }
 
 /**
@@ -379,6 +384,7 @@ Printer.prototype.moveUp = function (length) {
 Printer.prototype.moveDown = function (length) {
   this.send('G91');
   this.send('G1 Z' + length * (-1));
+  this.send('G90');
 }
 
 /**
