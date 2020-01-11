@@ -53,7 +53,7 @@ exports.setInfo = function (req, res) {
 
   }
 
-  // create a new connection object
+  // create a new info object
   let newPrinter = {
     name: req.body.name
   }
@@ -112,4 +112,83 @@ exports.getProgress = function (req, res) {
   return res.json({
     progress: __printer.getProgress()
   });
+}
+
+/**
+ * Function for getting the current file that is loaded
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} file object
+ */
+exports.getLoadedFile = function (req, res) {
+
+  // read the file
+  fs.readFile(__basedir + '/data/file.json', 'utf8', function (err, data) {
+    
+    // error reading the file
+    if (err) {
+      return res.status(500).json({
+        error: {
+          code: 'ER_INTERNAL',
+          message: err.message
+        }
+      });
+    }
+
+    // return the array
+    return res.json(JSON.parse(data));    
+
+  });
+
+}
+
+/**
+ * Function for setting a new loaded file
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} loaded file object
+ */
+exports.setLoadedFile = function (req, res) {
+
+  // check if required parameters are given
+  if (req.body.id === undefined ||
+      req.body.name === undefined) {
+
+    return res.status(400).json({
+      error: {
+        code: 'ER_MISSING_PARAMS',
+        message: 'ER_MISSING_PARAMS: Some parameters are missing. Required parameters: id, name'
+      }
+    });
+
+  }
+
+  // create a new file object
+  let newFile = {
+    id: req.body.id,
+    name: req.body.name
+  }
+
+  // write the file
+  fs.writeFile(__basedir + '/data/file.json', JSON.stringify(newFile), function (err) {
+
+    // writing error
+    if (err) {
+      return res.status(500).json({
+        error: {
+          code: 'ER_INTERNAL',
+          message: err.message
+        }
+      });
+    }
+
+    // return file object
+    res.status(201).json(newFile);
+
+  });
+
 }

@@ -15,4 +15,8 @@ module.exports = function (app) {
     .get(user.protected, printer.getInfo)
     .post(user.protected, printer.setInfo);
 
+  app.route('/api/v1/printer/file')
+    .get(user.protected, printer.getLoadedFile)
+    .post(user.protected, printer.setLoadedFile);
+
 }

@@ -173,7 +173,7 @@ module.exports = function (io) {
 
     socket.on('deleteLoadedFile', () => {
       io.emit('deleteLoadedFile');
-    })
+    });
 
   });
 
