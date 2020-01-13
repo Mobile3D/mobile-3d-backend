@@ -9,6 +9,7 @@ const lineByLine = require('n-readlines');
 em.addListener('log', function () {});
 em.addListener('progress', function () {});
 em.addListener('status', function () {});
+em.addListener('temperature', function () {});
 
 /**
  * Printer Class to symbolize the printer as an object
@@ -57,8 +58,12 @@ function Printer(port, baudRate) {
   // if the printer sends data
   // is triggered after every command sent to the microcontroller
   parser.on('data', function (data) {
-    // convert data to string
-    em.emit('log', data.toString());
+    
+    // convert data to string if it does not contain busy or temperature responses
+    if (!data.toString().includes('busy') && !data.toString().includes('ok T:')) {
+      em.emit('log', data.toString());
+    }
+
     // if there is no current command, go back
     if (!self.current) return; 
     // if there is a current command and data is 'ok'

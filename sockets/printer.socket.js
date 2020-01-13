@@ -20,6 +20,11 @@ module.exports = function (io) {
     io.emit('printStatus', data);
   });
 
+  // temperature event listener
+  __printer.emitter.on('temperature', (data) => {
+    io.emit('printTemperature', data);
+  });
+
   // event sender
   function eventEmitter(message) {
     //io.emit('printStatus', message);

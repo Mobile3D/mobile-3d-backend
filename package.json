@@ -27,7 +27,8 @@
     "ignore": [
       "data/uploads.json",
       "data/users.json",
-      "data/printer.json"
+      "data/printer.json",
+      "data/file.json"
     ]
   }
 }
