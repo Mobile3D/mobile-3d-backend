@@ -9,4 +9,7 @@ module.exports = function (app) {
     .get(user.protected, connection.getConnection)
     .post(user.protected, connection.setConnection);
 
+  app.route('/api/v1/ports')
+    .get(user.protected, connection.getAvailablePorts);
+
 };

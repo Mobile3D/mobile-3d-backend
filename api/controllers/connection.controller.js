@@ -1,5 +1,6 @@
 // required node packages
 const fs = require('fs');
+const { exec } = require('child_process');
 
 /**
  * Function to set connection details for the 3D-Printer
@@ -78,4 +79,22 @@ exports.getConnection = function (req, res) {
 
   });
 
+}
+
+exports.getAvailablePorts = function (req, res) {
+  exec('dir', function (err, stdout, stderr) {
+    
+    // error executing command
+    if (err) {
+      return res.status(500).json({
+        error: {
+          code: 'ER_INTERNAL',
+          message: err.message
+        }
+      });
+    }
+
+    return res.send(stdout.split('\n')[0]);
+
+  })
 }
