@@ -1,5 +1,6 @@
 // required node packages
 const fs = require('fs');
+const serialport = require("serialport");
 
 /**
  * Function for getting the connection details of the 3D-Printer
@@ -8,4 +9,22 @@ const fs = require('fs');
  */
 exports.getConnection = function () {
   return JSON.parse(fs.readFileSync(__basedir + '/data/connection.json', 'utf8'));
+}
+
+/**
+ * Function for setting the connection if only one connection is available
+ */
+exports.initConnection = function () {
+
+  let connection = JSON.parse(fs.readFileSync(__basedir + '/data/connection.json', 'utf8'));
+
+  serialport.list(function (err, ports) {
+    
+    if (ports.length === 1 && connection.port !== ports[0].comName) {
+      connection.port = ports[0].comName;
+      fs.writeFileSync(__basedir + '/data/connection.json', JSON.stringify(connection));
+    }
+
+  });
+
 }

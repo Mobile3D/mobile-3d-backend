@@ -17,7 +17,8 @@ const connectionHelper = require('./helper/connection.helper');
 global.__basedir = __dirname;
 const port = process.env.PORT || __port;
 
-// read connection details from file and initialize a new 3D-Printer
+// read connection details from file or take available connection and initialize a new 3D-Printer
+connectionHelper.initConnection();
 const connection = connectionHelper.getConnection();
 global.__printer = new printerHelper(connection.port, parseInt(connection.baudrate));
 

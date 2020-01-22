@@ -1,6 +1,6 @@
 // required node packages
 const fs = require('fs');
-const { exec } = require('child_process');
+const serialport = require("serialport");
 
 /**
  * Function to set connection details for the 3D-Printer
@@ -81,10 +81,18 @@ exports.getConnection = function (req, res) {
 
 }
 
+/**
+ * Function to get available ports for the 3D-Printer
+ * 
+ * @param {object} req the node request parameter
+ * @param {object} res the node response parameter
+ * 
+ * @returns {object} error or the available ports details
+ */
 exports.getAvailablePorts = function (req, res) {
-  exec('dir', function (err, stdout, stderr) {
-    
-    // error executing command
+  serialport.list(function (err, ports) {
+
+    // error getting ports
     if (err) {
       return res.status(500).json({
         error: {
@@ -94,7 +102,8 @@ exports.getAvailablePorts = function (req, res) {
       });
     }
 
-    return res.send(stdout.split('\n')[0]);
+    // return the array
+    return res.json(ports); 
 
-  })
+  });
 }
