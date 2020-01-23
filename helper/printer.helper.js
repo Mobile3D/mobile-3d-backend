@@ -243,9 +243,6 @@ Printer.prototype.printFile = function (file) {
     // queue must be smaller than the queue buffer chunk size
     if (this.queue.length < this.queueBufferChunkSize) {
 
-      // log
-      em.emit('log', 'Reloading the queue...');
-
       // as long as queue is smaller than the buffer size
       for (let count = 0; this.queue.length < this.queueBufferSize; count++) {
 

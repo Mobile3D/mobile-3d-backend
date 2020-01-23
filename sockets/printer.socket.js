@@ -5,9 +5,15 @@ module.exports = function (io) {
   const socketHelper = require('../helper/socket.helper');
   const arrayHelper = require('../helper/array.helper');
 
+  const consoleLog = [];
+
   // log event listener
   __printer.emitter.on('log', (data) => {
+
+    if (consoleLog.length > 50) consoleLog.shift();
+    consoleLog.push(data);
     io.emit('printLog', data);
+    io.emit('printConsoleLog', consoleLog);
   });
 
   // progress event listener
