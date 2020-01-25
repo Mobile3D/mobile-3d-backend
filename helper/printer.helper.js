@@ -24,6 +24,7 @@ em.addListener('temperature', function () {});
  * @prop {boolean} busy if the api is currently sending a command to the printer
  * @prop {string} status the current status of the printer
  * @prop {boolean} stopped if the printer should stop printing
+ * @prop {boolean} paused if the printer should pause printing
  * @prop {object} current the current command in the queue
  * @prop {object} queueCallback parameter for callback function of setProcessQueueCallback()
  * @prop {int} queueBufferSize the buffer size of the printers microcontroller
@@ -45,6 +46,7 @@ function Printer(port, baudRate) {
   this.busy = false;
   this.status = 'disconnected';
   this.stopped = false;
+  this.paused = false;
   this.current = null;
   this.queueCallback = null;
   this.queueBufferSize = 20;
@@ -243,7 +245,7 @@ Printer.prototype.printFile = function (file) {
   this.setProcessQueueCallback(() => {
       
     // queue must be smaller than the queue buffer chunk size
-    if (this.queue.length < this.queueBufferChunkSize) {
+    if ((this.queue.length < this.queueBufferChunkSize) && !this.paused) {
 
       // as long as queue is smaller than the buffer size
       for (let count = 0; this.queue.length < this.queueBufferSize; count++) {
@@ -285,6 +287,7 @@ Printer.prototype.printFile = function (file) {
         }
     
         // if everything is fine, send the line
+        console.log(line);
         this.send(line, cmt);
 
       }

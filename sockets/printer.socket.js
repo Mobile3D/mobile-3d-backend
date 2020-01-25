@@ -41,6 +41,8 @@ module.exports = function (io) {
   // listen for socket connections with authentication
   io.use(socketHelper.checkToken).on('connection', (socket) => {
   //io.on('connection', (socket) => {
+
+    io.emit('printStatus', __printer.getStatus());
     
     // printFile event listener
     socket.on('printFile', (_id) => {
@@ -187,6 +189,14 @@ module.exports = function (io) {
 
     socket.on('cancelPrint', () => {
       __printer.stop();
+    });
+
+    socket.on('pausePrint', () => {
+      __printer.pause();
+    });
+
+    socket.on('unpausePrint', () => {
+      __printer.unpause();
     });
 
     socket.on('loadFile', (file) => {
