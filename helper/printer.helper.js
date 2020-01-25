@@ -30,6 +30,7 @@ em.addListener('temperature', function () {});
  * @prop {int} queueBufferChunkSize the buffer chunk size of the printers microcontroller
  * @prop {int} lineNumber the number of processable lines a file has
  * @prop {int} lineCount the number of lines that have been processed
+ * @prop {object} progress the printing progress of the current file
  */
 function Printer(port, baudRate) {
 
@@ -42,7 +43,7 @@ function Printer(port, baudRate) {
   this.connected = false;
   this.queue = [];
   this.busy = false;
-  this.status = 'booting';
+  this.status = 'disconnected';
   this.stopped = false;
   this.current = null;
   this.queueCallback = null;
@@ -50,6 +51,7 @@ function Printer(port, baudRate) {
   this.queueBufferChunkSize = 10;
   this.lineNumber = 0;
   this.lineCount = 0;
+  this.progress = { sent: this.lineCount, total: this.lineNumber };
 
   let self = this;
   // initialize a parser and pipe it with readline
@@ -92,7 +94,7 @@ function Printer(port, baudRate) {
       this.send('M115');
       this.ready = true;
       this.connected = true;
-      this.status = 'connected';
+      this.status = 'ready';
       this.emitStatus();
     }, 5000);
   });
@@ -257,6 +259,7 @@ Printer.prototype.printFile = function (file) {
           this.status = 'completed';
           this.emitStatus();
           this.reset();
+          em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
           // set null as callback
           this.setProcessQueueCallback(null);
           return;
@@ -278,6 +281,7 @@ Printer.prototype.printFile = function (file) {
         
         if (this.queue.length === this.queueBufferChunkSize - 1 || this.lineCount === this.lineNumber) {
           em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
+          this.progress = { sent: this.lineCount, total: this.lineNumber };
         }
     
         // if everything is fine, send the line
@@ -459,8 +463,25 @@ Printer.prototype.stop = function () {
   this.emitStatus();
 }
 
+/** 
+ * Function for emitting the status of the printer
+ */
 Printer.prototype.emitStatus = function () {
   em.emit('status', this.status);
+}
+
+/** 
+ * Function for getting the current status of the printer
+ */
+Printer.prototype.getStatus = function () {
+  return this.status;
+}
+
+/** 
+ * Function for getting the printing progress
+ */
+Printer.prototype.getProgress = function () {
+  return this.progress.total !== 0 ? this.progress : {sent: 0, total: 1};
 }
 
 // export the event emitter

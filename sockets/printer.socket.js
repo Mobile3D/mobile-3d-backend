@@ -6,6 +6,8 @@ module.exports = function (io) {
   const arrayHelper = require('../helper/array.helper');
 
   const consoleLog = [];
+  let heatbedTemp = 0;
+  let hotendTemp = 0;
 
   // log event listener
   __printer.emitter.on('log', (data) => {
@@ -22,8 +24,8 @@ module.exports = function (io) {
   });
 
   // status event listener
-  __printer.emitter.on('status', (data) => {
-    io.emit('printStatus', data);
+  __printer.emitter.on('status', (status) => {
+    io.emit('printStatus', status);
   });
 
   // temperature event listener
@@ -33,7 +35,6 @@ module.exports = function (io) {
 
   // event sender
   function eventEmitter(message) {
-    //io.emit('printStatus', message);
     io.emit('printLog', message);
   }
 
@@ -166,11 +167,21 @@ module.exports = function (io) {
 
     socket.on('setHotendTemperature', (temp) => {
       __printer.setHotendTemperature(parseInt(temp));
+      hotendTemp = temp;
+      io.emit('temperature', {
+        heatbed: heatbedTemp,
+        hotend: hotendTemp
+      });
       eventEmitter('set hotend temperature to ' + temp);
     });
 
     socket.on('setHeatbedTemperature', (temp) => {
       __printer.setHeatbedTemperature(parseInt(temp));
+      heatbedTemp = temp;
+      io.emit('temperature', {
+        heatbed: heatbedTemp,
+        hotend: hotendTemp
+      });
       eventEmitter('set heatbed temperature to ' + temp);
     });
 
@@ -184,6 +195,17 @@ module.exports = function (io) {
 
     socket.on('deleteLoadedFile', () => {
       io.emit('deleteLoadedFile');
+    });
+
+    socket.on('getInfo', () => {
+      io.emit('info', {
+        status: __printer.getStatus(),
+        progress: __printer.getProgress(),
+        temperature: {
+          heatbed: heatbedTemp,
+          hotend: hotendTemp
+        }
+      });
     });
 
   });
