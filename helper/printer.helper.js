@@ -32,6 +32,8 @@ em.addListener('temperature', function () {});
  * @prop {int} lineNumber the number of processable lines a file has
  * @prop {int} lineCount the number of lines that have been processed
  * @prop {object} progress the printing progress of the current file
+ * @prop {object} hotendTemp the current and set temperature of the hotend
+ * @prop {object} heatbedTemp the current and set temperature of the heatbed
  */
 function Printer(port, baudRate) {
 
@@ -53,7 +55,9 @@ function Printer(port, baudRate) {
   this.queueBufferChunkSize = 10;
   this.lineNumber = 0;
   this.lineCount = 0;
-  this.progress = { sent: this.lineCount, total: this.lineNumber };
+  this.progress = { sent: 0, total: 1 };
+  this.hotendTemp = { current: 0, set: 0 };
+  this.heatbedTemp = { current: 0, set: 0 };
 
   let self = this;
   // initialize a parser and pipe it with readline
@@ -66,6 +70,40 @@ function Printer(port, baudRate) {
     // convert data to string if it does not contain busy or temperature responses
     if (!data.toString().includes('busy') && !data.toString().includes('ok T:')) {
       em.emit('log', data.toString());
+    }
+
+    // extract temperature data from string
+    let partHotend = [data.toString().match(/T:[0-9]{1,3} \/[0-9]{1,3}/g), data.toString().match(/T:[0-9]{1,3}/g)];
+    let partHeatbed = [data.toString().match(/B:[0-9]{1,3} \/[0-9]{1,3}/g), data.toString().match(/B:[0-9]{1,3}/g)];
+
+    // check if the set temperature has been sent
+    if (partHotend[0] !== null && partHeatbed[0] !== null) {
+
+      // set the set temperature
+      self.hotendTemp.set = parseInt(partHotend[0].toString().split('/')[1]);
+      self.heatbedTemp.set = parseInt(partHeatbed[0].toString().split('/')[1]);
+
+      // set the current temperature
+      self.hotendTemp.current = parseInt(partHotend[1].toString().split(':')[1]);
+      self.heatbedTemp.current = parseInt(partHeatbed[1].toString().split(':')[1]);
+
+      // emit the new temperature
+      em.emit('temperature', {
+        hotend: self.hotendTemp,
+        heatbed: self.heatbedTemp
+      });
+
+    } else if (partHotend[1] !== null && partHeatbed[1] !== null) {
+
+      // set the current temperature
+      self.hotendTemp.current = parseInt(partHotend[1].toString().split(':')[1]);
+      self.heatbedTemp.current = parseInt(partHeatbed[1].toString().split(':')[1]);
+
+      // emit the new temperature
+      em.emit('temperature', {
+        hotend: self.hotendTemp,
+        heatbed: self.heatbedTemp
+      });
     }
 
     // if there is no current command, go back
@@ -92,12 +130,14 @@ function Printer(port, baudRate) {
     this.status = 'connecting';
     this.emitStatus();
     setTimeout(() => {
+
       // get firmware information of marlinFW
       this.send('M115');
       this.ready = true;
       this.connected = true;
       this.status = 'ready';
       this.emitStatus();
+
     }, 5000);
   });
 
@@ -445,6 +485,7 @@ Printer.prototype.retract = function (length) {
  * @param {int} temp the temperature to set
  */
 Printer.prototype.setHotendTemperature = function (temp) {
+  this.hotendTemp.set = temp;
   this.send('M104 S' + temp);
 }
 
@@ -454,6 +495,7 @@ Printer.prototype.setHotendTemperature = function (temp) {
  * @param {int} temp the temperature to set
  */
 Printer.prototype.setHeatbedTemperature = function (temp) {
+  this.heatbedTemp.set = temp;
   this.send('M140 S' + temp);
 }
 
@@ -485,6 +527,16 @@ Printer.prototype.getStatus = function () {
  */
 Printer.prototype.getProgress = function () {
   return this.progress.total !== 0 ? this.progress : {sent: 0, total: 1};
+}
+
+/** 
+ * Function for getting the temperatures
+ */
+Printer.prototype.getTemperature = function () {
+  return {
+    hotend: this.hotendTemp,
+    heatbed: this.heatbedTemp
+  };
 }
 
 // export the event emitter

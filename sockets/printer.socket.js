@@ -6,8 +6,6 @@ module.exports = function (io) {
   const arrayHelper = require('../helper/array.helper');
 
   const consoleLog = [];
-  let heatbedTemp = 0;
-  let hotendTemp = 0;
 
   // log event listener
   __printer.emitter.on('log', (data) => {
@@ -30,7 +28,7 @@ module.exports = function (io) {
 
   // temperature event listener
   __printer.emitter.on('temperature', (data) => {
-    io.emit('printTemperature', data);
+    io.emit('temperature', data);
   });
 
   // event sender
@@ -42,7 +40,12 @@ module.exports = function (io) {
   io.use(socketHelper.checkToken).on('connection', (socket) => {
   //io.on('connection', (socket) => {
 
-    io.emit('printStatus', __printer.getStatus());
+    // inform the new connected user with the latest information
+    io.emit('info', {
+      status: __printer.getStatus(),
+      progress: __printer.getProgress(),
+      temperature: __printer.getTemperature()
+    });
     
     // printFile event listener
     socket.on('printFile', (_id) => {
@@ -102,119 +105,129 @@ module.exports = function (io) {
 
     });
 
+    // cancelPrint event listener
+    socket.on('cancelPrint', () => {
+      __printer.stop();
+    });
+
+    // moveLeft event listener
     socket.on('moveLeft', (length) => {
       __printer.moveLeft(parseFloat(length));
       eventEmitter('moving ' + length + ' left');
     });
 
+    // moveRight event listener
     socket.on('moveRight', (length) => {
       __printer.moveRight(parseFloat(length));
       eventEmitter('moving ' + length + ' right');
     });
 
+    // moveForward event listener
     socket.on('moveForward', (length) => {
       __printer.moveForward(parseFloat(length));
       eventEmitter('moving ' + length + ' forward');
     });
 
+    // moveBack event listener
     socket.on('moveBack', (length) => {
       __printer.moveBack(parseFloat(length));
       eventEmitter('moving ' + length + ' back');
     });
 
+    // moveUp event listener
     socket.on('moveUp', (length) => {
       __printer.moveUp(parseFloat(length));
       eventEmitter('moving ' + length + ' up');
     });
 
+    // moveDown event listener
     socket.on('moveDown', (length) => {
       __printer.moveDown(parseFloat(length));
       eventEmitter('moving ' + length + ' down');
     });
 
+    // moveXYHome event listener
     socket.on('moveXYHome', () => {
       __printer.moveXYHome();
       eventEmitter('moving XY home');
     });
 
+    // moveZHome event listener
     socket.on('moveZHome', () => {
       __printer.moveZHome();
       eventEmitter('moving Z home');
     });
 
+    // fanOn event listener
     socket.on('fanOn', (speed) => {
       __printer.fanOn(parseInt(speed));
       eventEmitter('turning fan on with a speed of ' + speed);
     });
 
+    // fanOff event listener
     socket.on('fanOff', () => {
       __printer.fanOff();
       eventEmitter('turning fan off');
     });
 
+    // sendManualCommand event listener
     socket.on('sendManualCommand', (cmd) => {
       __printer.sendManualCommand(cmd);
       eventEmitter('sending: ' + cmd);
     });
 
+    // extrude event listener
     socket.on('extrude', (length) => {
       __printer.extrude(parseFloat(length));
       eventEmitter('extruding ' + length);
     });
 
+    // retract event listener
     socket.on('retract', (length) => {
       __printer.retract(parseFloat(length));
       eventEmitter('retracting ' + length);
     });
 
+    // setHotendTemperature event listener
     socket.on('setHotendTemperature', (temp) => {
       __printer.setHotendTemperature(parseInt(temp));
-      hotendTemp = temp;
-      io.emit('temperature', {
-        heatbed: heatbedTemp,
-        hotend: hotendTemp
-      });
+      io.emit('temperature', __printer.getTemperature());
       eventEmitter('set hotend temperature to ' + temp);
     });
 
+    // setHeatbedTemperature event listener
     socket.on('setHeatbedTemperature', (temp) => {
       __printer.setHeatbedTemperature(parseInt(temp));
-      heatbedTemp = temp;
-      io.emit('temperature', {
-        heatbed: heatbedTemp,
-        hotend: hotendTemp
-      });
+      io.emit('temperature', __printer.getTemperature());
       eventEmitter('set heatbed temperature to ' + temp);
     });
 
-    socket.on('cancelPrint', () => {
-      __printer.stop();
-    });
-
+    // pausePrint event listener
     socket.on('pausePrint', () => {
       __printer.pause();
     });
 
+    // unpausePrint event listener
     socket.on('unpausePrint', () => {
       __printer.unpause();
     });
 
+    // loadFile event listener
     socket.on('loadFile', (file) => {
       io.emit('newFileToPrint', file);
     });
 
+    // deleteLoadedFile event listener
     socket.on('deleteLoadedFile', () => {
       io.emit('deleteLoadedFile');
     });
 
+    // getInfo event listener
     socket.on('getInfo', () => {
       io.emit('info', {
         status: __printer.getStatus(),
         progress: __printer.getProgress(),
-        temperature: {
-          heatbed: heatbedTemp,
-          hotend: hotendTemp
-        }
+        temperature: __printer.getTemperature()
       });
     });
 
