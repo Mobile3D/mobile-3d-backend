@@ -73,8 +73,8 @@ function Printer(port, baudRate) {
     }
 
     // extract temperature data from string
-    let partHotend = [data.toString().match(/T:[0-9]{1,3} \/[0-9]{1,3}/g), data.toString().match(/T:[0-9]{1,3}/g)];
-    let partHeatbed = [data.toString().match(/B:[0-9]{1,3} \/[0-9]{1,3}/g), data.toString().match(/B:[0-9]{1,3}/g)];
+    let partHotend = [data.toString().match(/T:[0-9]{1,3}\.[0-9]{1,2} \/[0-9]{1,3}\.[0-9]{1,2}/g), data.toString().match(/T:[0-9]{1,3}\.[0-9]{1,2}/g)];
+    let partHeatbed = [data.toString().match(/B:[0-9]{1,3}\.[0-9]{1,2} \/[0-9]{1,3}\.[0-9]{1,2}/g), data.toString().match(/B:[0-9]{1,3}\.[0-9]{1,2}/g)];
 
     // check if the set temperature has been sent
     if (partHotend[0] !== null && partHeatbed[0] !== null) {
@@ -133,6 +133,7 @@ function Printer(port, baudRate) {
 
       // get firmware information of marlinFW
       this.send('M115');
+      this.send('M155 S2');
       this.ready = true;
       this.connected = true;
       this.status = 'ready';
@@ -318,7 +319,7 @@ Printer.prototype.printFile = function (file) {
         if (!line || line === 'false' || !line.replace(/\s/g, '').length) {
           continue;
         }
-
+        
         this.lineCount++;
         
         if (this.queue.length === this.queueBufferChunkSize - 1 || this.lineCount === this.lineNumber) {
@@ -327,7 +328,6 @@ Printer.prototype.printFile = function (file) {
         }
     
         // if everything is fine, send the line
-        console.log(line);
         this.send(line, cmt);
 
       }
