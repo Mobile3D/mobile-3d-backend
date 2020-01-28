@@ -6,6 +6,8 @@ module.exports = function (io) {
   const arrayHelper = require('../helper/array.helper');
 
   const consoleLog = [];
+  let fileToPrint = '';
+  let pausedLine = 0;
 
   // log event listener
   __printer.emitter.on('log', (data) => {
@@ -91,6 +93,7 @@ module.exports = function (io) {
 
         // print the file
         __printer.printFile(__basedir + '/files/' + upload.filename);
+        fileToPrint = upload.filename;
 
         // emit a success event
         socket.emit('printSuccess', {
@@ -205,11 +208,15 @@ module.exports = function (io) {
     // pausePrint event listener
     socket.on('pausePrint', () => {
       __printer.pause();
+      pausedLine = __printer.getLineCount();
     });
 
     // unpausePrint event listener
     socket.on('unpausePrint', () => {
-      __printer.unpause();
+      if (__printer.isPaused()) {
+        __printer.unpause();
+        __printer.printFile(__basedir + '/files/' + fileToPrint, pausedLine);
+      }
     });
 
     // loadFile event listener

@@ -110,10 +110,13 @@ function Printer(port, baudRate) {
     if (!self.current) return; 
     // if there is a current command and data is 'ok'
     else if (data.toString() === 'ok') {
+      
+      if (self.paused) {
+        self.status = 'paused';
+        self.emitStatus();
+      }
 
       if (self.isStopped()) {
-        self.status = 'stopped';
-        self.emitStatus();
         self.reset();
       }
 
@@ -133,7 +136,7 @@ function Printer(port, baudRate) {
 
       // get firmware information of marlinFW
       this.send('M115');
-      this.send('M155 S2');
+      //this.send('M155 S2');
       this.ready = true;
       this.connected = true;
       this.status = 'ready';
@@ -189,6 +192,15 @@ Printer.prototype.isStopped = function () {
   return this.stopped;
 }
 
+/**
+ * Function for checking, if the printer has been paused
+ * 
+ * @returns {boolean}
+ */
+Printer.prototype.isPaused = function () {
+  return this.pauseed;
+}
+
 /** 
  * Function for getting the progress of the file printed
  * 
@@ -232,7 +244,7 @@ Printer.prototype.setProcessQueueCallback = function (callback) {
 Printer.prototype.processQueue = function () {
 
   // only if the printer is not stopped
-  if (!this.stopped) {
+  if (!this.stopped && !this.paused) {
   
     // get the next command in the queue
     let next = this.queue.shift();
@@ -248,6 +260,7 @@ Printer.prototype.processQueue = function () {
     this.current = next;
     // log
     em.emit('log', next.cmd + (next.cmt ? ` ;${next.cmt}` : ''));
+    this.lineCount++;
 
     // send the command to the printer
     this.serial.write(`${next.cmd}\n`);
@@ -265,7 +278,7 @@ Printer.prototype.processQueue = function () {
  * 
  * @param {object} file the g-code file
  */
-Printer.prototype.printFile = function (file) {
+Printer.prototype.printFile = function (file, lineToGo = 0) {
 
   // log
   this.status = 'printing';
@@ -282,11 +295,19 @@ Printer.prototype.printFile = function (file) {
 
   lines = new lineByLine(file);
 
+  // if the printer unpauses from a certain state
+  if (lineToGo > 0) {
+    for (let i = 0; i < lineToGo - 1; i++) {
+      l = lines.next();
+      if(l.toString('ascii').charAt(0) === ';') i--;
+    }
+  }
+
   // set a callback function
   this.setProcessQueueCallback(() => {
       
     // queue must be smaller than the queue buffer chunk size
-    if ((this.queue.length < this.queueBufferChunkSize) && !this.paused) {
+    if (this.queue.length < this.queueBufferChunkSize) {
 
       // as long as queue is smaller than the buffer size
       for (let count = 0; this.queue.length < this.queueBufferSize; count++) {
@@ -320,8 +341,6 @@ Printer.prototype.printFile = function (file) {
           continue;
         }
         
-        this.lineCount++;
-        
         if (this.queue.length === this.queueBufferChunkSize - 1 || this.lineCount === this.lineNumber) {
           em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
           this.progress = { sent: this.lineCount, total: this.lineNumber };
@@ -351,9 +370,17 @@ Printer.prototype.reset = function () {
   this.queueCallback = null;
   this.lineNumber = 0;
   this.lineCount = 0;
+  this.progress = { sent: 0, total: 1 };
+  this.hotendTemp = { current: 0, set: 0 };
+  this.heatbedTemp = { current: 0, set: 0 };
 
-  this.status = 'ready';
-  this.emitStatus();
+  if (!this.paused) {
+    this.status = 'ready';
+    this.emitStatus();
+  }
+
+  this.paused = false;
+
 }
 
 /**
@@ -509,10 +536,33 @@ Printer.prototype.stop = function () {
 }
 
 /** 
+ * Function for pausing the printer
+ */
+Printer.prototype.pause = function () {
+  this.paused = true;
+  this.status = 'pausing';
+  this.emitStatus();
+}
+
+/**
+ * Function for upausing the printer
+ */
+Printer.prototype.unpause = function () {
+  this.reset();
+}
+
+/** 
  * Function for emitting the status of the printer
  */
 Printer.prototype.emitStatus = function () {
   em.emit('status', this.status);
+}
+
+/**
+ * Function for getting the line count of the currently printed file
+ */
+Printer.prototype.getLineCount = function () {
+  return this.lineCount;
 }
 
 /** 
