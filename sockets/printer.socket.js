@@ -113,6 +113,20 @@ module.exports = function (io) {
       __printer.stop();
     });
 
+    // pausePrint event listener
+    socket.on('pausePrint', () => {
+      __printer.pause();
+      pausedLine = __printer.getLineCount();
+    });
+
+    // unpausePrint event listener
+    socket.on('unpausePrint', () => {
+      if (__printer.isPaused()) {
+        __printer.unpause();
+        __printer.printFile(__basedir + '/files/' + fileToPrint, pausedLine);
+      }
+    });
+
     // moveLeft event listener
     socket.on('moveLeft', (length) => {
       __printer.moveLeft(parseFloat(length));
@@ -203,20 +217,6 @@ module.exports = function (io) {
       __printer.setHeatbedTemperature(parseInt(temp));
       io.emit('temperature', __printer.getTemperature());
       eventEmitter('set heatbed temperature to ' + temp);
-    });
-
-    // pausePrint event listener
-    socket.on('pausePrint', () => {
-      __printer.pause();
-      pausedLine = __printer.getLineCount();
-    });
-
-    // unpausePrint event listener
-    socket.on('unpausePrint', () => {
-      if (__printer.isPaused()) {
-        __printer.unpause();
-        __printer.printFile(__basedir + '/files/' + fileToPrint, pausedLine);
-      }
     });
 
     // loadFile event listener

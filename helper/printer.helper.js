@@ -68,7 +68,7 @@ function Printer(port, baudRate) {
   parser.on('data', function (data) {
     
     // convert data to string if it does not contain busy or temperature responses
-    if (!data.toString().includes('busy') && !data.toString().includes('ok T:')) {
+    if (!data.toString().includes('busy') && data.toString().match(/T:[0-9]{1,3}\.[0-9]{1,2}/g) === null) {
       em.emit('log', data.toString());
     }
 
@@ -136,7 +136,7 @@ function Printer(port, baudRate) {
 
       // get firmware information of marlinFW
       this.send('M115');
-      //this.send('M155 S2');
+      this.send('M155 S2');
       this.ready = true;
       this.connected = true;
       this.status = 'ready';
@@ -198,7 +198,7 @@ Printer.prototype.isStopped = function () {
  * @returns {boolean}
  */
 Printer.prototype.isPaused = function () {
-  return this.pauseed;
+  return this.paused;
 }
 
 /** 
@@ -297,9 +297,10 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
 
   // if the printer unpauses from a certain state
   if (lineToGo > 0) {
-    for (let i = 0; i < lineToGo - 1; i++) {
+    for (let i = 0; i < lineToGo; i++) {
       l = lines.next();
       if(l.toString('ascii').charAt(0) === ';') i--;
+      else this.lineCount++;
     }
   }
 
@@ -319,7 +320,6 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
         // if there is no more line
         if (line === 'false') {
           // log
-          em.emit('log', 'File completed');
           this.status = 'completed';
           this.emitStatus();
           this.reset();
