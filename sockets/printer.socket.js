@@ -5,8 +5,11 @@ module.exports = function (io) {
   const socketHelper = require('../helper/socket.helper');
   const arrayHelper = require('../helper/array.helper');
 
+  // log array for console
   const consoleLog = [];
+  // file to print in case the print is being paused
   let fileToPrint = '';
+  // the line the print has been paused
   let pausedLine = 0;
 
   // log event listener
@@ -14,18 +17,18 @@ module.exports = function (io) {
 
     if (consoleLog.length > 50) consoleLog.shift();
     consoleLog.push(data);
-    io.emit('printLog', data);
-    io.emit('printConsoleLog', consoleLog);
+    io.emit('log', data);
+    io.emit('consoleLog', consoleLog);
   });
 
   // progress event listener
   __printer.emitter.on('progress', (data) => {
-    io.emit('printProgress', data);
+    io.emit('progress', data);
   });
 
   // status event listener
   __printer.emitter.on('status', (status) => {
-    io.emit('printStatus', status);
+    io.emit('status', status);
   });
 
   // temperature event listener
@@ -35,7 +38,7 @@ module.exports = function (io) {
 
   // event sender
   function eventEmitter(message) {
-    io.emit('printLog', message);
+    io.emit('log', message);
   }
 
   // listen for socket connections with authentication
