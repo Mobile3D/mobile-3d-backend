@@ -59,6 +59,8 @@ function Printer(port, baudRate) {
   this.hotendTemp = { current: 0, set: 0 };
   this.heatbedTemp = { current: 0, set: 0 };
 
+  this.valid = this.status === 'ready' || this.status === 'paused';
+
   let self = this;
   // initialize a parser and pipe it with readline
   const parser = this.serial.pipe(new Readline({ delimiter: '\n' }));
@@ -260,6 +262,14 @@ Printer.prototype.processQueue = function () {
     this.current = next;
     // log
     em.emit('log', next.cmd + (next.cmt ? ` ;${next.cmt}` : ''));
+    em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
+
+    if (this.lineCount === this.lineNumber) {
+      this.status = 'completed';
+      this.emitStatus();
+      this.reset();
+    }
+
     this.lineCount++;
 
     // send the command to the printer
@@ -319,11 +329,6 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
         
         // if there is no more line
         if (line === 'false') {
-          // log
-          this.status = 'completed';
-          this.emitStatus();
-          this.reset();
-          em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
           // set null as callback
           this.setProcessQueueCallback(null);
           return;
@@ -387,14 +392,14 @@ Printer.prototype.reset = function () {
  * Function for taking the printer to its XY home position
  */
 Printer.prototype.moveXYHome = function () {
-  this.send('G28 X0 Y0');
+   if (this.valid) this.send('G28 X0 Y0');
 }
 
 /**
  * Function for taking the printer to its Z home position
  */
 Printer.prototype.moveZHome = function () {
-  this.send('G28 Z0');
+  if (this.valid) this.send('G28 Z0');
 }
 
 /**
@@ -403,9 +408,11 @@ Printer.prototype.moveZHome = function () {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveLeft = function (length) {
-  this.send('G91');
-  this.send('G1 X' + length * (-1));
-  this.send('G90');
+  if (this.valid) {
+    this.send('G91');
+    this.send('G1 X' + length * (-1));
+    this.send('G90');
+  }
 }
 
 /**
@@ -414,9 +421,11 @@ Printer.prototype.moveLeft = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveRight = function (length) {
-  this.send('G91');
-  this.send('G1 X' + length);
-  this.send('G90');
+  if (this.valid) {
+    this.send('G91');
+    this.send('G1 X' + length);
+    this.send('G90');
+  }
 }
 
 /**
@@ -425,9 +434,11 @@ Printer.prototype.moveRight = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveForward = function (length) {
-  this.send('G91');
-  this.send('G1 Y' + length);
-  this.send('G90');
+  if (this.valid) {
+    this.send('G91');
+    this.send('G1 Y' + length);
+    this.send('G90');
+  }
 }
 
 /**
@@ -436,9 +447,11 @@ Printer.prototype.moveForward = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveBack = function (length) {
-  this.send('G91');
-  this.send('G1 Y' + length * (-1));
-  this.send('G90');
+  if (this.valid) {
+    this.send('G91');
+    this.send('G1 Y' + length * (-1));
+    this.send('G90');
+  }
 }
 
 /**
@@ -447,9 +460,11 @@ Printer.prototype.moveBack = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveUp = function (length) {
-  this.send('G91');
-  this.send('G1 Z' + length);
-  this.send('G90');
+  if (this.valid) {
+    this.send('G91');
+    this.send('G1 Z' + length);
+    this.send('G90');
+  }
 }
 
 /**
@@ -458,9 +473,11 @@ Printer.prototype.moveUp = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveDown = function (length) {
-  this.send('G91');
-  this.send('G1 Z' + length * (-1));
-  this.send('G90');
+  if (this.valid) {
+    this.send('G91');
+    this.send('G1 Z' + length * (-1));
+    this.send('G90');
+  }
 }
 
 /**
@@ -485,7 +502,7 @@ Printer.prototype.fanOff = function () {
  * @param {string} cmd the command to send
  */
 Printer.prototype.sendManualCommand = function (cmd) {
-  this.send(cmd);
+  if (this.valid) this.send(cmd);
 }
 
 /** 
@@ -494,7 +511,7 @@ Printer.prototype.sendManualCommand = function (cmd) {
  * @param {float} length the length to extrude
  */
 Printer.prototype.extrude = function (length) {
-  this.send('G1 E' + length);
+  if (this.valid) this.send('G1 E' + length);
 }
 
 /** 
@@ -503,7 +520,7 @@ Printer.prototype.extrude = function (length) {
  * @param {float} length the length to retract
  */
 Printer.prototype.retract = function (length) {
-  this.send('G1 E' + length * (-1));
+  if (this.valid) this.send('G1 E' + length * (-1));
 }
 
 /**
@@ -530,25 +547,29 @@ Printer.prototype.setHeatbedTemperature = function (temp) {
  * Function for stopping the printer
  */
 Printer.prototype.stop = function () {
-  this.stopped = true;
-  this.status = 'stopping';
-  this.emitStatus();
+  if (this.status === 'printing') {
+    this.stopped = true;
+    this.status = 'stopping';
+    this.emitStatus();
+  }
 }
 
 /** 
  * Function for pausing the printer
  */
 Printer.prototype.pause = function () {
-  this.paused = true;
-  this.status = 'pausing';
-  this.emitStatus();
+  if (this.status === 'printing') {
+    this.paused = true;
+    this.status = 'pausing';
+    this.emitStatus();
+  }
 }
 
 /**
  * Function for upausing the printer
  */
 Printer.prototype.unpause = function () {
-  this.reset();
+  if (this.status === 'paused') this.reset();
 }
 
 /** 

@@ -95,7 +95,7 @@ module.exports = function (io) {
         }
 
         // print the file
-        __printer.printFile(__basedir + '/files/' + upload.filename);
+        if (__printer.getStatus() === 'ready') __printer.printFile(__basedir + '/files/' + upload.filename);
         fileToPrint = upload.filename;
 
         // emit a success event
