@@ -262,9 +262,10 @@ Printer.prototype.processQueue = function () {
     this.current = next;
     // log
     em.emit('log', next.cmd + (next.cmt ? ` ;${next.cmt}` : ''));
+    this.progress = { sent: this.lineCount, total: this.lineNumber };
     em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
 
-    if (this.lineCount === this.lineNumber) {
+    if ((this.lineCount === this.lineNumber) && this.status === 'printing') {
       this.status = 'completed';
       this.emitStatus();
       this.reset();
@@ -312,6 +313,8 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
       if(l.toString('ascii').charAt(0) === ';') i--;
       else this.lineCount++;
     }
+    // somehow i need that... otherwise it would not finish after pausing
+    this.lineCount++;
   }
 
   // set a callback function
@@ -347,8 +350,8 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
         }
         
         if (this.queue.length === this.queueBufferChunkSize - 1 || this.lineCount === this.lineNumber) {
-          em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
-          this.progress = { sent: this.lineCount, total: this.lineNumber };
+          // em.emit('progress', { sent: this.lineCount, total: this.lineNumber });
+          // this.progress = { sent: this.lineCount, total: this.lineNumber };
         }
     
         // if everything is fine, send the line
