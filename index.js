@@ -1,5 +1,6 @@
 // required node packages
 const express = require('express');
+const path = require('path');
 const app = express();
 const http = require('http').createServer(app);
 const bodyParser = require('body-parser');
@@ -80,7 +81,13 @@ connectionRoutes(app);
 const printerSocket = require('./sockets/printer.socket');
 printerSocket(io);
 
-app.use(apiHelper.checkRoute);
+//app.use(apiHelper.checkRoute);
+
+// implement the frontend
+app.use(express.static(path.join(__dirname, 'web')));
+app.get('*', function(req, res) {
+  res.sendFile(path.join(__dirname, 'web', 'index.html'));
+});
 
 // start the http server
 http.listen(port);
