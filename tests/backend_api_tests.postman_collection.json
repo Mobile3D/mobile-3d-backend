@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "1817e00b-233a-4afc-940b-eceaf8244145",
-		"name": "Mobile3D Backend API",
+		"name": "Diplomarbeit",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -37,7 +37,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "localhost:4000/api/v1/users/4",
+									"raw": "localhost:4000/api/v1/users/5",
 									"host": [
 										"localhost"
 									],
@@ -46,7 +46,7 @@
 										"api",
 										"v1",
 										"users",
-										"4"
+										"5"
 									]
 								}
 							},
@@ -120,6 +120,11 @@
 											"key": "password",
 											"value": "test",
 											"type": "text"
+										},
+										{
+											"key": "remember",
+											"value": "true",
+											"type": "text"
 										}
 									]
 								},
@@ -156,7 +161,7 @@
 									"urlencoded": [
 										{
 											"key": "username",
-											"value": "schatzeder2",
+											"value": "testuser2",
 											"type": "text"
 										},
 										{
@@ -166,23 +171,23 @@
 										},
 										{
 											"key": "firstname",
-											"value": "Matthias",
+											"value": "Test",
 											"type": "text"
 										},
 										{
 											"key": "lastname",
-											"value": "Schatzeder",
+											"value": "User",
 											"type": "text"
 										},
 										{
 											"key": "admin",
-											"value": "false",
+											"value": "true",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "localhost:4000/api/v1/users/add",
+									"raw": "localhost:4000/api/v1/users",
 									"host": [
 										"localhost"
 									],
@@ -190,8 +195,7 @@
 									"path": [
 										"api",
 										"v1",
-										"users",
-										"add"
+										"users"
 									]
 								}
 							},
@@ -221,7 +225,7 @@
 										{
 											"key": "file",
 											"type": "file",
-											"src": "/C:/Users/Alexander/Documents/Diplomarbeit/Software/Backend/mobile-3d-backend/files/t1.gcode"
+											"src": "/C:/Users/Alexander/Documents/test.md"
 										}
 									]
 								},
@@ -352,6 +356,218 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "get Info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:4000/api/v1/printer/info",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"printer",
+										"info"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get File",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:4000/api/v1/printer/file",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"printer",
+										"file"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "set Info",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "name",
+											"value": "My 3D-Printer",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/printer/info",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"printer",
+										"info"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "set File",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "id",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "t1.gcode",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/printer/file",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"printer",
+										"file"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Connection",
+					"item": [
+						{
+							"name": "get Connection",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:4000/api/v1/connection",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"connection"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get Available Ports",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:4000/api/v1/connection/ports",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"connection",
+										"ports"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "set Connection",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "port",
+											"value": "COM3",
+											"type": "text"
+										},
+										{
+											"key": "baudrate",
+											"value": "250000",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/connection",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"connection"
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"_postman_isSubFolder": true
@@ -364,7 +580,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOjEsInVzZXJuYW1lIjoicG9zY2hlciIsImxhc3RuYW1lIjoiUG9zY2hlciIsImFkbWluIjp0cnVlLCJpYXQiOjE1NjM5Njg5NzQsImV4cCI6MTU2NDA1NTM3NH0.tQPSj8IOpuiT6gvA6fvZ4qPgBV5wgKyhbidyhO7Yj14",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOjEsInVzZXJuYW1lIjoicG9zY2hlciIsImZpcnN0bmFtZSI6IkFsZXhhbmRlciIsImxhc3RuYW1lIjoiUG9zY2hlciIsImFkbWluIjp0cnVlLCJpYXQiOjE1NzA1MjIyMDIsImV4cCI6MTYwMjA1ODIwMn0.xcOl9dcPEKyy0EUPcQtAV7qjkFusoWWHK_vaSexpGcA",
 				"type": "string"
 			}
 		]
