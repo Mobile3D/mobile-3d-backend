@@ -111,7 +111,8 @@ function Printer(port, baudRate) {
     // if there is no current command, go back
     if (!self.current) return; 
     // if there is a current command and data is 'ok'
-    else if (data.toString() === 'ok') {
+    // FIXED M105 BUT UNTESTED!!!
+    else if (data.toString() === 'ok' || data.toString().match(/T:[0-9]{1,3}\.[0-9]{1,2}/g)) {
       
       if (self.paused) {
         self.status = 'paused';
@@ -345,7 +346,7 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
         }
 
         // if line is false or if there is only a space in line, go on
-        if (!line || line === 'false' || !line.replace(/\s/g, '').length || line.includes('M105')) {
+        if (!line || line === 'false' || !line.replace(/\s/g, '').length /*|| line.includes('M105')*/) {
           continue;
         }
         
