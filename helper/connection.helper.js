@@ -19,6 +19,12 @@ exports.initConnection = function () {
   let connection = JSON.parse(fs.readFileSync(__basedir + '/data/connection.json', 'utf8'));
 
   serialport.list(function (err, ports) {
+
+    for (let i = 0; i < ports.length; i++) {
+      if (ports[i].manufacturer === undefined) {
+        ports.splice(i);
+      }
+    }
     
     if (ports.length === 1 && connection.port !== ports[0].comName) {
       connection.port = ports[0].comName;
