@@ -345,7 +345,7 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
         }
 
         // if line is false or if there is only a space in line, go on
-        if (!line || line === 'false' || !line.replace(/\s/g, '').length) {
+        if (!line || line === 'false' || !line.replace(/\s/g, '').length || line.includes('M105')) {
           continue;
         }
         
@@ -502,7 +502,9 @@ Printer.prototype.sendManualCommand = function (cmd) {
  * @param {float} length the length to extrude
  */
 Printer.prototype.extrude = function (length) {
+  this.send('G91');
   this.send('G1 E' + length);
+  this.send('G90');
 }
 
 /** 
@@ -511,7 +513,9 @@ Printer.prototype.extrude = function (length) {
  * @param {float} length the length to retract
  */
 Printer.prototype.retract = function (length) {
+  this.send('G91');
   this.send('G1 E' + length * (-1));
+  this.send('G90');
 }
 
 /**
