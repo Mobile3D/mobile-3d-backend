@@ -15,14 +15,14 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-rate-limit": "^5.1.1",
-    "helmet": "^3.21.2",
+    "helmet": "^3.21.3",
     "jsonwebtoken": "^8.5.1",
     "multer": "^1.4.2",
     "n-readlines": "^1.0.0",
     "nodemon": "^2.0.2",
     "serialport": "^7.1.5",
     "socket.io": "^2.3.0",
-    "uuid": "^3.3.3"
+    "uuid": "^3.4.0"
   },
   "nodemonConfig": {
     "ignore": [
