@@ -102,6 +102,12 @@ exports.getAvailablePorts = function (req, res) {
       });
     }
 
+    for (let i = 0; i < ports.length; i++) {
+      if (ports[i].manufacturer === undefined) {
+        ports.splice(i);
+      }
+    }
+
     // return the array
     return res.json(ports); 
 
