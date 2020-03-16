@@ -395,14 +395,14 @@ Printer.prototype.reset = function () {
  * Function for taking the printer to its XY home position
  */
 Printer.prototype.moveXYHome = function () {
-   if (this.valid) this.send('G28 X0 Y0');
+  this.send('G28 X0 Y0');
 }
 
 /**
  * Function for taking the printer to its Z home position
  */
 Printer.prototype.moveZHome = function () {
-  if (this.valid) this.send('G28 Z0');
+  this.send('G28 Z0');
 }
 
 /**
@@ -411,11 +411,9 @@ Printer.prototype.moveZHome = function () {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveLeft = function (length) {
-  if (this.valid) {
-    this.send('G91');
-    this.send('G1 X' + length * (-1));
-    this.send('G90');
-  }
+  this.send('G91');
+  this.send('G1 X' + length * (-1));
+  this.send('G90');
 }
 
 /**
@@ -424,11 +422,9 @@ Printer.prototype.moveLeft = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveRight = function (length) {
-  if (this.valid) {
-    this.send('G91');
-    this.send('G1 X' + length);
-    this.send('G90');
-  }
+  this.send('G91');
+  this.send('G1 X' + length);
+  this.send('G90');
 }
 
 /**
@@ -437,11 +433,9 @@ Printer.prototype.moveRight = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveForward = function (length) {
-  if (this.valid) {
-    this.send('G91');
-    this.send('G1 Y' + length);
-    this.send('G90');
-  }
+  this.send('G91');
+  this.send('G1 Y' + length);
+  this.send('G90');
 }
 
 /**
@@ -450,11 +444,9 @@ Printer.prototype.moveForward = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveBack = function (length) {
-  if (this.valid) {
-    this.send('G91');
-    this.send('G1 Y' + length * (-1));
-    this.send('G90');
-  }
+  this.send('G91');
+  this.send('G1 Y' + length * (-1));
+  this.send('G90');
 }
 
 /**
@@ -463,11 +455,9 @@ Printer.prototype.moveBack = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveUp = function (length) {
-  if (this.valid) {
-    this.send('G91');
-    this.send('G1 Z' + length);
-    this.send('G90');
-  }
+  this.send('G91');
+  this.send('G1 Z' + length);
+  this.send('G90');
 }
 
 /**
@@ -476,11 +466,9 @@ Printer.prototype.moveUp = function (length) {
  * @param {float} length the length the printer should move
  */
 Printer.prototype.moveDown = function (length) {
-  if (this.valid) {
-    this.send('G91');
-    this.send('G1 Z' + length * (-1));
-    this.send('G90');
-  }
+  this.send('G91');
+  this.send('G1 Z' + length * (-1));
+  this.send('G90');
 }
 
 /**
@@ -505,7 +493,7 @@ Printer.prototype.fanOff = function () {
  * @param {string} cmd the command to send
  */
 Printer.prototype.sendManualCommand = function (cmd) {
-  if (this.valid) this.send(cmd);
+  this.send(cmd);
 }
 
 /** 
@@ -514,7 +502,7 @@ Printer.prototype.sendManualCommand = function (cmd) {
  * @param {float} length the length to extrude
  */
 Printer.prototype.extrude = function (length) {
-  if (this.valid) this.send('G1 E' + length);
+  this.send('G1 E' + length);
 }
 
 /** 
@@ -523,7 +511,7 @@ Printer.prototype.extrude = function (length) {
  * @param {float} length the length to retract
  */
 Printer.prototype.retract = function (length) {
-  if (this.valid) this.send('G1 E' + length * (-1));
+  this.send('G1 E' + length * (-1));
 }
 
 /**
