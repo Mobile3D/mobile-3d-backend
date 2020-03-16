@@ -102,14 +102,17 @@ exports.getAvailablePorts = function (req, res) {
       });
     }
 
-    // for (let i = 0; i < ports.length; i++) {
-    //   if (ports[i].manufacturer === undefined) {
-    //     ports.splice(i);
-    //   }
-    // }
+    let realPorts = [];
+
+    for (let i = 0; i < ports.length; i++) {
+      if (ports[i].serialNumber !== undefined) {
+        realPorts.push(ports[i]);
+      }
+    }
+
 
     // return the array
-    return res.json(ports); 
+    return res.json(realPorts); 
 
   });
 }

@@ -20,14 +20,16 @@ exports.initConnection = function () {
 
   serialport.list(function (err, ports) {
 
+    let realPorts = [];
+
     for (let i = 0; i < ports.length; i++) {
-      if (ports[i].manufacturer === undefined) {
-        ports.splice(i);
+      if (ports[i].serialNumber !== undefined) {
+        realPorts.push(ports[i]);
       }
     }
     
-    if (ports.length === 1 && connection.port !== ports[0].comName) {
-      connection.port = ports[0].comName;
+    if (realPorts.length === 1 && connection.port !== realPorts[0].comName) {
+      connection.port = realPorts[0].comName;
       fs.writeFileSync(__basedir + '/data/connection.json', JSON.stringify(connection));
     }
 
