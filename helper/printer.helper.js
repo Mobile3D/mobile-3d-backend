@@ -300,9 +300,9 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
   // get lines of the file
   let lines = new lineByLine(file);
   let l;
- 
+  
   while (l = lines.next()) {
-    if(l.toString('ascii').charAt(0) !== ';') this.lineNumber++;
+    this.lineNumber++;
   }
 
   lines = new lineByLine(file);
@@ -311,10 +311,8 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
   if (lineToGo > 0) {
     for (let i = 0; i < lineToGo; i++) {
       l = lines.next();
-      if(l.toString('ascii').charAt(0) === ';') i--;
-      else this.lineCount++;
+      this.lineCount++;
     }
-    // somehow i need that... otherwise it would not finish after pausing
     this.lineCount++;
   }
 
@@ -343,6 +341,10 @@ Printer.prototype.printFile = function (file, lineToGo = 0) {
           const parts = line.split(';');
           line = parts[0];
           cmt = parts[1];
+        }
+
+        if (!line || line === 'false' || !line.replace(/\s/g, '').length) {
+          this.lineCount++;
         }
 
         // if line is false or if there is only a space in line, go on
