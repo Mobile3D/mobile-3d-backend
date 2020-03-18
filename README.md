@@ -12,4 +12,15 @@
 
 3. Start the Backend
 
-   `npm start`
+   `sudo npm start`
+   
+   
+### Running in autostart
+
+1. Open crontab
+
+   `crontab -e`
+   
+2. Add the following line at the end
+
+   `@reboot sudo /bin/bash /home/pi/mobile-3d-backend/start.sh`
