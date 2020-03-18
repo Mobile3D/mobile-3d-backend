@@ -15,7 +15,7 @@
    `sudo npm start`
    
    
-### Running in autostart
+### Running in autostart (linux)
 
 1. Open crontab
 
