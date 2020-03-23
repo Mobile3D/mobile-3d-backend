@@ -1,5 +1,7 @@
 # mobile-3d-backend
  Backend for the Mobile3D printer
+ 
+ working installation of npm required
 
 ## How to use?
 
